@@ -5,6 +5,7 @@
 */
 
 import { MikroOrmModuleOptions } from '@mikro-orm/nestjs';
+import { RedisOptions } from 'ioredis';
 import { IEmailConfig } from './email-config.interface';
 import { IJwt } from './jwt.interface';
 
@@ -13,6 +14,8 @@ export interface IConfig {
   port: number;
   domain: string;
   db: MikroOrmModuleOptions;
+  redis: RedisOptions;
   jwt: IJwt;
   emailService: IEmailConfig;
+  testing: boolean;
 }

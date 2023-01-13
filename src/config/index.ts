@@ -5,10 +5,12 @@
 */
 
 import { LoadStrategy } from '@mikro-orm/core';
-import { defineConfig } from '@mikro-orm/postgresql';
+import { defineConfig as definePGConfig } from '@mikro-orm/postgresql';
+import { defineConfig as defineSqliteConfig } from '@mikro-orm/sqlite';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { IConfig } from './interfaces/config.interface';
+import { redisUrlParser } from './utils/redis-url-parser.util';
 
 export function config(): IConfig {
   const publicKey = readFileSync(
@@ -19,6 +21,13 @@ export function config(): IConfig {
     join(__dirname, '..', '..', 'keys/private.key'),
     'utf-8',
   );
+  const testing = process.env.NODE_ENV !== 'production';
+  const dbOptions = {
+    entities: ['dist/**/*.entities.js', 'dist/**/*.embeddables.js'],
+    entitiesTs: ['src/**/*.entities.ts', 'src/**/*.embeddables.ts'],
+    loadStrategy: LoadStrategy.JOINED,
+    allowGlobalContext: true,
+  };
 
   return {
     id: process.env.APP_ID,
@@ -52,12 +61,16 @@ export function config(): IConfig {
         pass: process.env.EMAIL_PASSWORD,
       },
     },
-    db: defineConfig({
-      clientUrl: process.env.DATABASE_URL,
-      entities: ['dist/**/*.entities.js', 'dist/**/*.embeddables.js'],
-      entitiesTs: ['src/**/*.entities.ts', 'src/**/*.embeddables.ts'],
-      loadStrategy: LoadStrategy.JOINED,
-      allowGlobalContext: true,
-    }),
+    db: testing
+      ? definePGConfig({
+          ...dbOptions,
+          clientUrl: process.env.DATABASE_URL,
+        })
+      : defineSqliteConfig({
+          ...dbOptions,
+          dbName: 'sqlite::memory:',
+        }),
+    redis: redisUrlParser(process.env.REDIS_URL),
+    testing,
   };
 }

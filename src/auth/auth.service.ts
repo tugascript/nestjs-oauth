@@ -4,14 +4,15 @@
   Afonso Barracha
 */
 
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
 import {
   BadRequestException,
+  CACHE_MANAGER,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { compare } from 'bcrypt';
+import { Cache } from 'cache-manager';
 import { CommonService } from '../common/common.service';
 import { EMAIL_REGEX, SLUG_REGEX } from '../common/consts/regex.const';
 import { IMessage } from '../common/interfaces/message.interface';
@@ -28,14 +29,13 @@ import { EmailDto } from './dtos/email.dto';
 import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { SignInDto } from './dtos/sign-in.dto';
 import { SignUpDto } from './dtos/sign-up.dto';
-import { BlacklistedTokenEntity } from './entities/blacklisted-token.entity';
 import { IAuthResult } from './interfaces/auth-result.interface';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(BlacklistedTokenEntity)
-    private readonly blacklistedTokensRepository: EntityRepository<BlacklistedTokenEntity>,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
     private readonly commonService: CommonService,
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
@@ -101,11 +101,12 @@ export class AuthService {
   }
 
   public async logout(refreshToken: string): Promise<IMessage> {
-    const { id, tokenId } = await this.jwtService.verifyToken<IRefreshToken>(
-      refreshToken,
-      TokenTypeEnum.REFRESH,
-    );
-    await this.blacklistToken(id, tokenId);
+    const { id, tokenId, exp } =
+      await this.jwtService.verifyToken<IRefreshToken>(
+        refreshToken,
+        TokenTypeEnum.REFRESH,
+      );
+    await this.blacklistToken(id, tokenId, exp);
     return this.commonService.generateMessage('Logout successful');
   }
 
@@ -141,6 +142,7 @@ export class AuthService {
   public async changePassword(
     userId: number,
     dto: ChangePasswordDto,
+    domain?: string,
   ): Promise<IAuthResult> {
     const { password1, password2, password } = dto;
     this.comparePasswords(password1, password2);
@@ -149,7 +151,10 @@ export class AuthService {
       password,
       password1,
     );
-    const [accessToken, refreshToken] = await this.generateAuthTokens(user);
+    const [accessToken, refreshToken] = await this.generateAuthTokens(
+      user,
+      domain,
+    );
     return { user, accessToken, refreshToken };
   }
 
@@ -157,26 +162,28 @@ export class AuthService {
     userId: number,
     tokenId: string,
   ): Promise<void> {
-    const count = await this.blacklistedTokensRepository.count({
-      user: userId,
-      tokenId,
-    });
+    const time = await this.cacheManager.get<number>(
+      `blacklist:${userId}:${tokenId}`,
+    );
 
-    if (count > 0) {
-      throw new UnauthorizedException('Token is invalid');
+    if (!isUndefined(time) && !isNull(time)) {
+      throw new UnauthorizedException('Invalid token');
     }
   }
 
-  private async blacklistToken(userId: number, tokenId: string): Promise<void> {
-    const blacklistedToken = this.blacklistedTokensRepository.create({
-      user: userId,
-      tokenId,
-    });
-    await this.commonService.saveEntity(
-      this.blacklistedTokensRepository,
-      blacklistedToken,
-      true,
-    );
+  private async blacklistToken(
+    userId: number,
+    tokenId: string,
+    exp: number,
+  ): Promise<void> {
+    const now = Math.floor(Date.now() / 1000);
+    const ttl = exp - now;
+
+    if (ttl > 0) {
+      await this.commonService.throwInternalError(
+        this.cacheManager.set(`blacklist:${userId}:${tokenId}`, now, ttl),
+      );
+    }
   }
 
   private comparePasswords(password1: string, password2: string): void {
