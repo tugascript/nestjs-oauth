@@ -2,7 +2,8 @@
 
 ## Intro
 
-This is the source code for the tutorial [Nest OAuth](https://dev.to/rodrigogs/nest-oauth-4j4e).
+This is the source code for the
+tutorial [Nest Authentication with OAuth2.0](https://dev.to/tugascript/nestjs-authentication-with-oauth20-configuration-and-operations-41k).
 This is the 1<sup>st</sup> part on a 5 part series, where we will build a production level NestJS OAuth2 service.
 
 ### Contents

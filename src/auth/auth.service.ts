@@ -231,7 +231,7 @@ export class AuthService {
     tokenId: string,
     exp: number,
   ): Promise<void> {
-    const now = Math.floor(Date.now() / 1000);
+    const now = dayjs().unix();
     const ttl = exp - now;
 
     if (ttl > 0) {
@@ -263,7 +263,7 @@ export class AuthService {
       emailOrUsername.length > 106 ||
       !SLUG_REGEX.test(emailOrUsername)
     ) {
-      throw new BadRequestException('Username is invalid');
+      throw new BadRequestException('Invalid username');
     }
 
     return this.usersService.findOneByUsername(emailOrUsername, true);
