@@ -20,10 +20,13 @@ import { UserEntity } from '../entities/user.entity';
 import { UsersService } from '../users.service';
 
 describe('UsersService', () => {
-  let service: UsersService, commonService: CommonService, orm: MikroORM;
+  let module: TestingModule,
+    service: UsersService,
+    commonService: CommonService,
+    orm: MikroORM;
 
   beforeAll(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    module = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
@@ -54,6 +57,13 @@ describe('UsersService', () => {
   const email2 = faker.internet.email();
   const name = faker.name.firstName();
   const password = faker.internet.password(8);
+
+  it('should be defined', () => {
+    expect(module).toBeDefined();
+    expect(service).toBeDefined();
+    expect(commonService).toBeDefined();
+    expect(orm).toBeDefined();
+  });
 
   describe('create', () => {
     it('should create a user', async () => {
@@ -188,26 +198,32 @@ describe('UsersService', () => {
     });
 
     describe('password', () => {
+      const newPassword = faker.internet.password(8);
+
       it('should update a user password', async () => {
-        const newPassword = faker.internet.password(8);
         const user = await service.updatePassword(1, password, newPassword);
         expect(user).toBeInstanceOf(UserEntity);
         expect(await compare(newPassword, user.password)).toBe(true);
         expect(user.credentials.version).toStrictEqual(1);
       });
 
-      it('should throw a bad request exception', async () => {
+      it('should throw a bad request exception if the new password is the same', async () => {
+        await expect(
+          service.updatePassword(1, newPassword, newPassword),
+        ).rejects.toThrowError('New password must be different');
+      });
+
+      it('should throw a bad request exception if the password is wrong', async () => {
         await expect(
           service.updatePassword(
             1,
             'wrong-password',
             faker.internet.password(8),
           ),
-        ).rejects.toThrowError('Invalid password');
+        ).rejects.toThrowError('Wrong password');
       });
 
       it('should reset a user password', async () => {
-        const newPassword = faker.internet.password(8);
         const user = await service.resetPassword(1, 1, newPassword);
         expect(user).toBeInstanceOf(UserEntity);
         expect(await compare(newPassword, user.password)).toBe(true);
@@ -234,11 +250,6 @@ describe('UsersService', () => {
   afterAll(async () => {
     await orm.getSchemaGenerator().dropSchema();
     await orm.close(true);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-    expect(commonService).toBeDefined();
-    expect(orm).toBeDefined();
+    await module.close();
   });
 });

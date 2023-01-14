@@ -46,8 +46,4 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
     await this.orm.close();
     this.loggerService.log('Closed database connection');
   }
-
-  getHello(): string {
-    return 'Hello World!';
-  }
 }

@@ -5,6 +5,7 @@
 */
 
 import { Embeddable, Property } from '@mikro-orm/core';
+import dayjs from 'dayjs';
 import { ICredentials } from '../interfaces/credentials.interface';
 
 @Embeddable()
@@ -15,17 +16,21 @@ export class CredentialsEmbeddable implements ICredentials {
   @Property({ default: '' })
   public lastPassword = '';
 
-  @Property({ default: Date.now() })
-  public updatedAt: number = Date.now();
+  @Property({ default: dayjs().unix() })
+  public passwordUpdatedAt: number = dayjs().unix();
+
+  @Property({ default: dayjs().unix() })
+  public updatedAt: number = dayjs().unix();
 
   public updatePassword(password: string): void {
     this.version++;
     this.lastPassword = password;
-    this.updatedAt = Date.now();
+    this.passwordUpdatedAt = dayjs().unix();
+    this.updatedAt = dayjs().unix();
   }
 
   public updateVersion(): void {
     this.version++;
-    this.updatedAt = Date.now();
+    this.updatedAt = dayjs().unix();
   }
 }

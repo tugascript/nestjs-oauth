@@ -97,6 +97,22 @@ export class UsersService {
     return user;
   }
 
+  public async confirmEmail(
+    userId: number,
+    version: number,
+  ): Promise<UserEntity> {
+    const user = await this.findOneByCredentials(userId, version);
+
+    if (user.confirmed) {
+      throw new BadRequestException('Email already confirmed');
+    }
+
+    user.confirmed = true;
+    user.credentials.updateVersion();
+    await this.commonService.saveEntity(this.usersRepository, user);
+    return user;
+  }
+
   public async updateUsername(
     userId: number,
     dto: UsernameDto,
@@ -117,7 +133,10 @@ export class UsersService {
     const user = await this.findOneById(userId);
 
     if (!(await compare(password, user.password))) {
-      throw new BadRequestException('Invalid password');
+      throw new BadRequestException('Wrong password');
+    }
+    if (await compare(newPassword, user.password)) {
+      throw new BadRequestException('New password must be different');
     }
 
     user.credentials.updatePassword(user.password);
@@ -132,7 +151,7 @@ export class UsersService {
     password: string,
   ): Promise<UserEntity> {
     const user = await this.findOneByCredentials(userId, version);
-    user.credentials.updateVersion();
+    user.credentials.updatePassword(user.password);
     user.password = await hash(password, 10);
     await this.commonService.saveEntity(this.usersRepository, user);
     return user;
