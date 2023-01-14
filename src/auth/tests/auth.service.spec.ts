@@ -242,7 +242,7 @@ describe('AuthService', () => {
           emailOrUsername: 'username&',
           password,
         }),
-      ).rejects.toThrowError('Username is invalid');
+      ).rejects.toThrowError('Invalid username');
     });
 
     it('should throw an error if the user is not confirmed', async () => {
