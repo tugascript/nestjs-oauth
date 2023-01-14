@@ -8,6 +8,8 @@ import { faker } from '@faker-js/faker';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { isJWT, isUUID } from 'class-validator';
+import { sign } from 'jsonwebtoken';
+import { promisify } from 'util';
 import { CommonModule } from '../../common/common.module';
 import { config } from '../../config';
 import { validationSchema } from '../../config/config.schema';
@@ -73,6 +75,30 @@ describe('JwtService', () => {
       await expect(
         service.verifyToken<IAccessToken>(invalidToken, TokenTypeEnum.ACCESS),
       ).rejects.toThrow('Invalid token');
+    });
+
+    it('should throw an error if the token is expired', async () => {
+      const expiredToken = sign(
+        {
+          id: user.id,
+          version: user.credentials.version,
+        },
+        process.env.JWT_CONFIRMATION_SECRET,
+        {
+          expiresIn: 1,
+          issuer: process.env.APP_ID,
+          audience: process.env.DOMAIN,
+          subject: user.email,
+        },
+      );
+      const timeout = promisify(setTimeout);
+      await timeout(1001);
+      await expect(
+        service.verifyToken<IEmailToken>(
+          expiredToken,
+          TokenTypeEnum.CONFIRMATION,
+        ),
+      ).rejects.toThrow('Token expired');
     });
   });
 

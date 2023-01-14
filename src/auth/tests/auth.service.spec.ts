@@ -209,6 +209,42 @@ describe('AuthService', () => {
       expect(isJWT(result.refreshToken)).toBe(true);
     });
 
+    it('should throw an unauthorized exception if the password is wrong', async () => {
+      await expect(
+        authService.signIn({
+          emailOrUsername: email,
+          password: password + '1',
+        }),
+      ).rejects.toThrowError('Invalid credentials');
+    });
+
+    it('should throw an unauthorized exception if email or username is wrong', async () => {
+      await expect(
+        authService.signIn({
+          emailOrUsername: faker.internet.email(),
+          password,
+        }),
+      ).rejects.toThrowError('Invalid credentials');
+    });
+
+    it('should throw a bad request exception if the email is malformed', async () => {
+      await expect(
+        authService.signIn({
+          emailOrUsername: faker.internet.email() + '&',
+          password,
+        }),
+      ).rejects.toThrowError('Invalid email');
+    });
+
+    it('should throw a bad request exception if the username is malformed', async () => {
+      await expect(
+        authService.signIn({
+          emailOrUsername: 'username&',
+          password,
+        }),
+      ).rejects.toThrowError('Username is invalid');
+    });
+
     it('should throw an error if the user is not confirmed', async () => {
       const email2 = faker.internet.email().toLowerCase();
       await authService.signUp({
@@ -280,6 +316,10 @@ describe('AuthService', () => {
       expect(
         await cacheManager.get(`blacklist:${id}:${tokenId}`),
       ).toBeDefined();
+
+      await expect(authService.refreshTokenAccess(token)).rejects.toThrowError(
+        'Invalid token',
+      );
     });
   });
 
@@ -415,6 +455,15 @@ describe('AuthService', () => {
       expect(isJWT(result.accessToken)).toBe(true);
       expect(result.refreshToken).toBeDefined();
       expect(isJWT(result.refreshToken)).toBe(true);
+    });
+
+    it('old password should not work', async () => {
+      await expect(
+        authService.signIn({
+          emailOrUsername: email,
+          password: newPassword,
+        }),
+      ).rejects.toThrowError('You changed your password recently');
     });
   });
 

@@ -180,6 +180,15 @@ describe('UsersService', () => {
     });
 
     describe('email', () => {
+      it('should throw a bad request exception if password is wrong', async () => {
+        await expect(
+          service.updateEmail(1, {
+            email: faker.internet.email(),
+            password: password + '1',
+          }),
+        ).rejects.toThrowError('Wrong password');
+      });
+
       it('should update a user email', async () => {
         const newEmail = faker.internet.email();
         const user = await service.updateEmail(1, {

@@ -165,7 +165,7 @@ export class UsersService {
     const { email, password } = dto;
 
     if (!(await compare(password, user.password))) {
-      throw new BadRequestException('Invalid password');
+      throw new BadRequestException('Wrong password');
     }
 
     const formattedEmail = email.toLowerCase();

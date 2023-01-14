@@ -1,6 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
+/*
+  Free and Open Source - GNU LGPLv3
+  Copyright © 2023
+  Afonso Barracha
+*/
+
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import { Test, TestingModule } from '@nestjs/testing';
+import request from 'supertest';
 import { AppModule } from './../src/app.module';
 
 describe('AppController (e2e)', () => {
