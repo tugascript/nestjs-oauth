@@ -13,8 +13,9 @@ import {
 } from '@nestjs/common';
 import { compare } from 'bcrypt';
 import { Cache } from 'cache-manager';
+import { isEmail } from 'class-validator';
 import { CommonService } from '../common/common.service';
-import { EMAIL_REGEX, SLUG_REGEX } from '../common/consts/regex.const';
+import { SLUG_REGEX } from '../common/consts/regex.const';
 import { IMessage } from '../common/interfaces/message.interface';
 import { isNull, isUndefined } from '../common/utils/validation.util';
 import { TokenTypeEnum } from '../jwt/enums/token-type.enum';
@@ -196,14 +197,18 @@ export class AuthService {
     emailOrUsername: string,
   ): Promise<UserEntity> {
     if (emailOrUsername.includes('@')) {
-      if (!EMAIL_REGEX.test(emailOrUsername)) {
+      if (isEmail(emailOrUsername)) {
         throw new BadRequestException('Invalid email');
       }
 
       return this.usersService.findOneByEmail(emailOrUsername);
     }
 
-    if (emailOrUsername.length < 3 || !SLUG_REGEX.test(emailOrUsername)) {
+    if (
+      emailOrUsername.length < 3 ||
+      emailOrUsername.length > 106 ||
+      !SLUG_REGEX.test(emailOrUsername)
+    ) {
       throw new BadRequestException('Username is invalid');
     }
 

@@ -35,9 +35,14 @@ export class CommonService {
    */
   public async validateEntity(entity: Dictionary): Promise<void> {
     const errors = await validate(entity);
+    const messages: string[] = [];
+
+    for (const error of errors) {
+      messages.push(...Object.values(error.constraints));
+    }
 
     if (errors.length > 0) {
-      throw new BadRequestException(JSON.stringify(errors));
+      throw new BadRequestException(messages.join(',\n'));
     }
   }
 

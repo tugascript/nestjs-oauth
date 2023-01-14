@@ -71,7 +71,7 @@ export class MailerService {
     );
   }
 
-  private sendEmail(
+  public sendEmail(
     to: string,
     subject: string,
     html: string,

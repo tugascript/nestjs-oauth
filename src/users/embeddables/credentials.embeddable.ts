@@ -5,7 +5,6 @@
 */
 
 import { Embeddable, Property } from '@mikro-orm/core';
-import { isNull, isUndefined } from '../../common/utils/validation.util';
 import { ICredentials } from '../interfaces/credentials.interface';
 
 @Embeddable()
@@ -18,15 +17,6 @@ export class CredentialsEmbeddable implements ICredentials {
 
   @Property({ default: Date.now() })
   public updatedAt: number = Date.now();
-
-  constructor(input?: Partial<ICredentials>) {
-    if (!isUndefined(input) || !isNull(input)) {
-      const { version, lastPassword, updatedAt } = input;
-      this.version = version ?? this.version;
-      this.lastPassword = lastPassword ?? this.lastPassword;
-      this.updatedAt = updatedAt ?? this.updatedAt;
-    }
-  }
 
   public updatePassword(password: string): void {
     this.version++;

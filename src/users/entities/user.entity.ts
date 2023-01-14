@@ -49,7 +49,7 @@ export class UserEntity implements IUser {
 
   @Property({ columnType: 'boolean', default: false })
   @IsBoolean()
-  public confirmed = false;
+  public confirmed: true | false = false;
 
   @Embedded(() => CredentialsEmbeddable)
   public credentials: CredentialsEmbeddable = new CredentialsEmbeddable();

@@ -23,8 +23,8 @@ export function config(): IConfig {
   );
   const testing = process.env.NODE_ENV !== 'production';
   const dbOptions = {
-    entities: ['dist/**/*.entities.js', 'dist/**/*.embeddables.js'],
-    entitiesTs: ['src/**/*.entities.ts', 'src/**/*.embeddables.ts'],
+    entities: ['dist/**/*.entity.js', 'dist/**/*.embeddable.js'],
+    entitiesTs: ['src/**/*.entity.ts', 'src/**/*.embeddable.ts'],
     loadStrategy: LoadStrategy.JOINED,
     allowGlobalContext: true,
   };
@@ -62,13 +62,13 @@ export function config(): IConfig {
       },
     },
     db: testing
-      ? definePGConfig({
+      ? defineSqliteConfig({
+          ...dbOptions,
+          dbName: ':memory:',
+        })
+      : definePGConfig({
           ...dbOptions,
           clientUrl: process.env.DATABASE_URL,
-        })
-      : defineSqliteConfig({
-          ...dbOptions,
-          dbName: 'sqlite::memory:',
         }),
     redis: redisUrlParser(process.env.REDIS_URL),
     testing,
