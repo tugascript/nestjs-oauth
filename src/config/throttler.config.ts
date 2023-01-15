@@ -18,11 +18,13 @@ export class ThrottlerConfig implements ThrottlerOptionsFactory {
   constructor(private readonly configService: ConfigService) {}
 
   createThrottlerOptions(): ThrottlerModuleOptions {
-    return {
-      ...this.configService.get<ThrottlerModuleOptions>('throttler'),
-      storage: new ThrottlerStorageRedisService(
-        this.configService.get<RedisOptions>('redis'),
-      ),
-    };
+    return this.configService.get<boolean>('testing')
+      ? this.configService.get<ThrottlerModuleOptions>('throttler')
+      : {
+          ...this.configService.get<ThrottlerModuleOptions>('throttler'),
+          storage: new ThrottlerStorageRedisService(
+            this.configService.get<RedisOptions>('redis'),
+          ),
+        };
   }
 }

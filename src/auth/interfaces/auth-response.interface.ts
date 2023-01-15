@@ -4,9 +4,9 @@
   Afonso Barracha
 */
 
-import { IAuthResUser } from './auth-response-user.interface';
+import { IAuthResponseUser } from './auth-response-user.interface';
 
 export interface IAuthResponse {
-  user: IAuthResUser;
+  user: IAuthResponseUser;
   accessToken: string;
 }

@@ -17,7 +17,7 @@ import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
-import { IAuthResUser } from '../auth/interfaces/auth-response-user.interface';
+import { IAuthResponseUser } from '../auth/interfaces/auth-response-user.interface';
 import { ChangeEmailDto } from './dtos/change-email.dto';
 import { PasswordDto } from './dtos/password.dto';
 import { UsernameDto } from './dtos/username.dto';
@@ -57,7 +57,7 @@ export class UsersController {
   }
 
   @Get('/me')
-  public async getMe(@CurrentUser() id: number): Promise<IAuthResUser> {
+  public async getMe(@CurrentUser() id: number): Promise<IAuthResponseUser> {
     const user = await this.usersService.findOneById(id);
     return {
       ...UsersController.mapUser(user),
@@ -69,7 +69,7 @@ export class UsersController {
   public async updateEmail(
     @CurrentUser() id: number,
     @Body() dto: ChangeEmailDto,
-  ): Promise<IAuthResUser> {
+  ): Promise<IAuthResponseUser> {
     const user = await this.usersService.updateEmail(id, dto);
     return {
       ...UsersController.mapUser(user),

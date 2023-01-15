@@ -16,8 +16,7 @@ import {
 } from '@nestjs/common';
 import { validate } from 'class-validator';
 import slugify from 'slugify';
-import { v4 } from 'uuid';
-import { IMessage } from './interfaces/message.interface';
+import { MessageMapper } from './mappers/message.mapper';
 import { isNull, isUndefined } from './utils/validation.util';
 
 @Injectable()
@@ -147,7 +146,7 @@ export class CommonService {
     return slugify(str, { lower: true, replacement: '.', remove: /['_\.\-]/g });
   }
 
-  public generateMessage(message: string): IMessage {
-    return { id: v4(), message };
+  public generateMessage(message: string): MessageMapper {
+    return new MessageMapper(message);
   }
 }

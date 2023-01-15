@@ -4,7 +4,7 @@
   Afonso Barracha
 */
 
-export interface IAuthResUser {
+export interface IAuthResponseUser {
   id: number;
   name: string;
   username: string;
