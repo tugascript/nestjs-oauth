@@ -71,6 +71,10 @@ export function config(): IConfig {
           clientUrl: process.env.DATABASE_URL,
         }),
     redis: redisUrlParser(process.env.REDIS_URL),
+    throttler: {
+      ttl: parseInt(process.env.THROTTLE_TTL, 10),
+      limit: parseInt(process.env.THROTTLE_LIMIT, 10),
+    },
     testing,
   };
 }

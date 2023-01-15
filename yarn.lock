@@ -1262,6 +1262,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nestjs/throttler@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "@nestjs/throttler@npm:3.1.0"
+  dependencies:
+    md5: ^2.2.1
+  peerDependencies:
+    "@nestjs/common": ^7.0.0 || ^8.0.0 || ^9.0.0
+    "@nestjs/core": ^7.0.0 || ^8.0.0 || ^9.0.0
+    reflect-metadata: ^0.1.13
+  checksum: fc0776d709aa5160005a2a86f6315cca9ce2d1c8dc8bf562810030f30e38e03b23ab4b7e265bdb70eb209dc84498a1390d1ba666eb3487f250dce308f31524b4
+  languageName: node
+  linkType: hard
+
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -2735,6 +2748,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"charenc@npm:0.0.2":
+  version: 0.0.2
+  resolution: "charenc@npm:0.0.2"
+  checksum: 81dcadbe57e861d527faf6dd3855dc857395a1c4d6781f4847288ab23cffb7b3ee80d57c15bba7252ffe3e5e8019db767757ee7975663ad2ca0939bb8fcaf2e5
+  languageName: node
+  linkType: hard
+
 "chokidar@npm:3.5.3, chokidar@npm:^3.5.3":
   version: 3.5.3
   resolution: "chokidar@npm:3.5.3"
@@ -3107,6 +3127,13 @@ __metadata:
     shebang-command: ^2.0.0
     which: ^2.0.1
   checksum: 671cc7c7288c3a8406f3c69a3ae2fc85555c04169e9d611def9a675635472614f1c0ed0ef80955d5b6d4e724f6ced67f0ad1bb006c2ea643488fcfef994d7f52
+  languageName: node
+  linkType: hard
+
+"crypt@npm:0.0.2":
+  version: 0.0.2
+  resolution: "crypt@npm:0.0.2"
+  checksum: baf4c7bbe05df656ec230018af8cf7dbe8c14b36b98726939cef008d473f6fe7a4fad906cfea4062c93af516f1550a3f43ceb4d6615329612c6511378ed9fe34
   languageName: node
   linkType: hard
 
@@ -4557,6 +4584,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-buffer@npm:~1.1.6":
+  version: 1.1.6
+  resolution: "is-buffer@npm:1.1.6"
+  checksum: 4a186d995d8bbf9153b4bd9ff9fd04ae75068fe695d29025d25e592d9488911eeece84eefbd8fa41b8ddcc0711058a71d4c466dcf6f1f6e1d83830052d8ca707
+  languageName: node
+  linkType: hard
+
 "is-core-module@npm:^2.9.0":
   version: 2.11.0
   resolution: "is-core-module@npm:2.11.0"
@@ -5581,6 +5615,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"md5@npm:^2.2.1":
+  version: 2.3.0
+  resolution: "md5@npm:2.3.0"
+  dependencies:
+    charenc: 0.0.2
+    crypt: 0.0.2
+    is-buffer: ~1.1.6
+  checksum: a63cacf4018dc9dee08c36e6f924a64ced735b37826116c905717c41cebeb41a522f7a526ba6ad578f9c80f02cb365033ccd67fe186ffbcc1a1faeb75daa9b6e
+  languageName: node
+  linkType: hard
+
 "media-typer@npm:0.3.0":
   version: 0.3.0
   resolution: "media-typer@npm:0.3.0"
@@ -5911,6 +5956,7 @@ __metadata:
     "@nestjs/platform-express": ^9.2.1
     "@nestjs/schematics": ^9.0.4
     "@nestjs/testing": ^9.2.1
+    "@nestjs/throttler": ^3.1.0
     "@types/bcrypt": ^5.0.0
     "@types/express": ^4.17.15
     "@types/handlebars": ^4.1.0
@@ -5937,6 +5983,7 @@ __metadata:
     jest: 29.3.1
     joi: ^17.7.0
     jsonwebtoken: ^9.0.0
+    nestjs-throttler-storage-redis: ^0.2.2
     nodemailer: ^6.9.0
     prettier: ^2.8.2
     reflect-metadata: ^0.1.13
@@ -5952,6 +5999,19 @@ __metadata:
     uuid: ^9.0.0
   languageName: unknown
   linkType: soft
+
+"nestjs-throttler-storage-redis@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "nestjs-throttler-storage-redis@npm:0.2.2"
+  peerDependencies:
+    "@nestjs/common": ">=7.0.0"
+    "@nestjs/core": ">=7.0.0"
+    "@nestjs/throttler": ">=2.0.0"
+    ioredis: ^5.0.4
+    reflect-metadata: ^0.1.13
+  checksum: cf90ded06d2210ef3c52c45afd8a2bb8da34e695d9c7ad602030e1422c40b0ae07a75ce3a2522c10fb42e87a7b6fe0561114051d809fd8c202f8cebdc9b98770
+  languageName: node
+  linkType: hard
 
 "node-abort-controller@npm:^3.0.1":
   version: 3.0.1

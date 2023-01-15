@@ -13,9 +13,12 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
+import { isInt } from 'class-validator';
 import { CommonService } from '../common/common.service';
+import { SLUG_REGEX } from '../common/consts/regex.const';
 import { isNull, isUndefined } from '../common/utils/validation.util';
 import { ChangeEmailDto } from './dtos/change-email.dto';
+import { PasswordDto } from './dtos/password.dto';
 import { UsernameDto } from './dtos/username.dto';
 import { UserEntity } from './entities/user.entity';
 
@@ -43,6 +46,26 @@ export class UsersService {
     });
     await this.commonService.saveEntity(this.usersRepository, user, true);
     return user;
+  }
+
+  public async findOneByIdOrUsername(
+    idOrUsername: string,
+  ): Promise<UserEntity> {
+    const parsedValue = parseInt(idOrUsername, 10);
+
+    if (!isNaN(parsedValue) && parsedValue > 0 && isInt(parsedValue)) {
+      return this.findOneById(parsedValue);
+    }
+
+    if (
+      idOrUsername.length < 3 ||
+      idOrUsername.length > 106 ||
+      !SLUG_REGEX.test(idOrUsername)
+    ) {
+      throw new BadRequestException('Invalid username');
+    }
+
+    return this.findOneByUsername(idOrUsername);
   }
 
   public async findOneById(id: number): Promise<UserEntity> {
@@ -175,8 +198,13 @@ export class UsersService {
     return user;
   }
 
-  public async delete(userId: number): Promise<UserEntity> {
+  public async delete(userId: number, dto: PasswordDto): Promise<UserEntity> {
     const user = await this.findOneById(userId);
+
+    if (!(await compare(dto.password, user.password))) {
+      throw new BadRequestException('Wrong password');
+    }
+
     await this.commonService.removeEntity(this.usersRepository, user);
     return user;
   }

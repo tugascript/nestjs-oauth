@@ -5,6 +5,7 @@
 */
 
 import { MikroOrmModuleOptions } from '@mikro-orm/nestjs';
+import { ThrottlerModuleOptions } from '@nestjs/throttler';
 import { RedisOptions } from 'ioredis';
 import { IEmailConfig } from './email-config.interface';
 import { IJwt } from './jwt.interface';
@@ -17,5 +18,6 @@ export interface IConfig {
   redis: RedisOptions;
   jwt: IJwt;
   emailService: IEmailConfig;
+  throttler: ThrottlerModuleOptions;
   testing: boolean;
 }
