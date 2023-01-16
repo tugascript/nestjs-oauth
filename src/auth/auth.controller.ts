@@ -17,7 +17,6 @@ import { ConfigService } from '@nestjs/config';
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
-  ApiNoContentResponse,
   ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -125,8 +124,9 @@ export class AuthController {
   }
 
   @Post('/logout')
-  @ApiNoContentResponse({
-    description: 'Logs out the user and returns no content',
+  @ApiOkResponse({
+    type: MessageMapper,
+    description: 'The user is logged out',
   })
   @ApiBadRequestResponse({
     description: 'Something is invalid on the request body',
@@ -142,7 +142,7 @@ export class AuthController {
     const message = await this.authService.logout(token);
     res
       .clearCookie(this.cookieName, { path: this.cookiePath })
-      .status(204)
+      .status(200)
       .send(message);
   }
 
