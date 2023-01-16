@@ -92,6 +92,13 @@ export class UsersController {
   }
 
   @Patch('/username')
+  @ApiOkResponse({
+    type: ResponseUserMapper,
+    description: 'The username is updated.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Something is invalid on the request body.',
+  })
   public async updateUsername(
     @CurrentUser() id: number,
     @Body() dto: UsernameDto,
