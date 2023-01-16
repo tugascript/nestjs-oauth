@@ -4,7 +4,7 @@
   Afonso Barracha
 */
 
-export interface IResUser {
+export interface IResponseUser {
   id: number;
   name: string;
   username: string;
