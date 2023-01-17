@@ -93,7 +93,7 @@ export class AuthController {
     const result = await this.authService.signIn(singInDto, origin);
     this.saveRefreshCookie(res, result.refreshToken)
       .status(200)
-      .send(AuthResponseMapper.map(result));
+      .json(AuthResponseMapper.map(result));
   }
 
   @Public()
@@ -120,7 +120,7 @@ export class AuthController {
     );
     this.saveRefreshCookie(res, result.refreshToken)
       .status(200)
-      .send(AuthResponseMapper.map(result));
+      .json(AuthResponseMapper.map(result));
   }
 
   @Post('/logout')
@@ -143,7 +143,7 @@ export class AuthController {
     res
       .clearCookie(this.cookieName, { path: this.cookiePath })
       .status(200)
-      .send(message);
+      .json(message);
   }
 
   @Public()
@@ -166,7 +166,7 @@ export class AuthController {
     const result = await this.authService.confirmEmail(confirmEmailDto);
     this.saveRefreshCookie(res, result.refreshToken)
       .status(200)
-      .send(AuthResponseMapper.map(result));
+      .json(AuthResponseMapper.map(result));
   }
 
   @Public()
