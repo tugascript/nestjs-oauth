@@ -232,7 +232,7 @@ export class AuthService {
     exp: number,
   ): Promise<void> {
     const now = dayjs().unix();
-    const ttl = exp - now;
+    const ttl = (exp - now) * 1000;
 
     if (ttl > 0) {
       await this.commonService.throwInternalError(
