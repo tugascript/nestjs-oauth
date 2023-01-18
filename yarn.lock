@@ -1541,6 +1541,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/cookie-parser@npm:^1.4.3":
+  version: 1.4.3
+  resolution: "@types/cookie-parser@npm:1.4.3"
+  dependencies:
+    "@types/express": "*"
+  checksum: f390f3af1b1711190dee2c2ecd9af33af81fbde8d81ee820dadb6fe1e0d80c3faba40af37c6ed36fb88b04b64870f6a021f7e9edceecd17c42fe22abe0af5005
+  languageName: node
+  linkType: hard
+
 "@types/cookiejar@npm:*":
   version: 2.1.2
   resolution: "@types/cookiejar@npm:2.1.2"
@@ -1593,7 +1602,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express@npm:^4.17.15":
+"@types/express@npm:*, @types/express@npm:^4.17.15":
   version: 4.17.15
   resolution: "@types/express@npm:4.17.15"
   dependencies:
@@ -3088,10 +3097,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cookie-parser@npm:^1.4.6":
+  version: 1.4.6
+  resolution: "cookie-parser@npm:1.4.6"
+  dependencies:
+    cookie: 0.4.1
+    cookie-signature: 1.0.6
+  checksum: 1e5a63aa82e8eb4e02d2977c6902983dee87b02e87ec5ec43ac3cb1e72da354003716570cd5190c0ad9e8a454c9d3237f4ad6e2f16d0902205a96a1c72b77ba5
+  languageName: node
+  linkType: hard
+
 "cookie-signature@npm:1.0.6":
   version: 1.0.6
   resolution: "cookie-signature@npm:1.0.6"
   checksum: f4e1b0a98a27a0e6e66fd7ea4e4e9d8e038f624058371bf4499cfcd8f3980be9a121486995202ba3fca74fbed93a407d6d54d43a43f96fd28d0bd7a06761591a
+  languageName: node
+  linkType: hard
+
+"cookie@npm:0.4.1":
+  version: 0.4.1
+  resolution: "cookie@npm:0.4.1"
+  checksum: bd7c47f5d94ab70ccdfe8210cde7d725880d2fcda06d8e375afbdd82de0c8d3b73541996e9ce57d35f67f672c4ee6d60208adec06b3c5fc94cebb85196084cf8
   languageName: node
   linkType: hard
 
@@ -4322,6 +4348,13 @@ __metadata:
   dependencies:
     function-bind: ^1.1.1
   checksum: b9ad53d53be4af90ce5d1c38331e712522417d017d5ef1ebd0507e07c2fbad8686fffb8e12ddecd4c39ca9b9b47431afbb975b8abf7f3c3b82c98e9aad052792
+  languageName: node
+  linkType: hard
+
+"helmet@npm:^6.0.1":
+  version: 6.0.1
+  resolution: "helmet@npm:6.0.1"
+  checksum: 1ca20d0b7888b6208130bbb50d183e68d53bb5fa0caead2106226d6d53216dfc893b4b5c07528304e342884f75d87702003b80884b065cb5dcbc705fb4a6ad52
   languageName: node
   linkType: hard
 
@@ -5986,6 +6019,7 @@ __metadata:
     "@nestjs/testing": ^9.2.1
     "@nestjs/throttler": ^3.1.0
     "@types/bcrypt": ^5.0.0
+    "@types/cookie-parser": ^1.4.3
     "@types/express": ^4.17.15
     "@types/handlebars": ^4.1.0
     "@types/jest": 29.2.5
@@ -6001,12 +6035,14 @@ __metadata:
     cache-manager-ioredis-yet: ^1.1.0
     class-transformer: ^0.5.1
     class-validator: ^0.14.0
+    cookie-parser: ^1.4.6
     dayjs: ^1.11.7
     eslint: ^8.31.0
     eslint-config-prettier: ^8.6.0
     eslint-plugin-header: ^3.1.1
     eslint-plugin-prettier: ^4.2.1
     handlebars: ^4.7.7
+    helmet: ^6.0.1
     ioredis: ^5.2.4
     jest: 29.3.1
     joi: ^17.7.0
