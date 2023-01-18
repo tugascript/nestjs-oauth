@@ -29,6 +29,7 @@ import { Public } from '../auth/decorators/public.decorator';
 import { IAuthResponseUser } from '../auth/interfaces/auth-response-user.interface';
 import { AuthResponseUserMapper } from '../auth/mappers/auth-response-user.mapper';
 import { ChangeEmailDto } from './dtos/change-email.dto';
+import { GetUserParams } from './dtos/get-user.params';
 import { PasswordDto } from './dtos/password.dto';
 import { UsernameDto } from './dtos/username.dto';
 import { IResponseUser } from './interfaces/response-user.interface';
@@ -60,10 +61,10 @@ export class UsersController {
   @ApiNotFoundResponse({
     description: 'The user is not found.',
   })
-  public async getUser(
-    @Param('idOrUsername') idOrUsername: string,
-  ): Promise<IResponseUser> {
-    const user = await this.usersService.findOneByIdOrUsername(idOrUsername);
+  public async getUser(@Param() params: GetUserParams): Promise<IResponseUser> {
+    const user = await this.usersService.findOneByIdOrUsername(
+      params.idOrUsername,
+    );
     return ResponseUserMapper.map(user);
   }
 

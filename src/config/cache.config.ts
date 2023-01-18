@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { redisStore } from 'cache-manager-ioredis-yet';
-import { RedisOptions } from 'ioredis';
 
 @Injectable()
 export class CacheConfig implements CacheOptionsFactory {
@@ -24,7 +23,7 @@ export class CacheConfig implements CacheOptionsFactory {
       ? { ttl }
       : {
           store: await redisStore({
-            ...this.configService.get<RedisOptions>('redis'),
+            ...this.configService.get('redis'),
             ttl,
           }),
         };
