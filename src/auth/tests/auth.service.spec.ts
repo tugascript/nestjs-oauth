@@ -10,6 +10,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { CACHE_MANAGER, CacheModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { Cache } from 'cache-manager';
 import { isJWT, isUUID } from 'class-validator';
 import { CommonModule } from '../../common/common.module';
@@ -17,6 +18,7 @@ import { CommonService } from '../../common/common.service';
 import { config } from '../../config';
 import { validationSchema } from '../../config/config.schema';
 import { MikroOrmConfig } from '../../config/mikroorm.config';
+import { ThrottlerConfig } from '../../config/throttler.config';
 import { TokenTypeEnum } from '../../jwt/enums/token-type.enum';
 import { IRefreshToken } from '../../jwt/interfaces/refresh-token.interface';
 import { JwtModule } from '../../jwt/jwt.module';
@@ -59,6 +61,10 @@ describe('AuthService', () => {
         UsersModule,
         JwtModule,
         MailerModule,
+        ThrottlerModule.forRootAsync({
+          imports: [ConfigModule],
+          useClass: ThrottlerConfig,
+        }),
       ],
       providers: [AuthService, CommonModule],
     }).compile();
@@ -416,7 +422,7 @@ describe('AuthService', () => {
   describe('change password', () => {
     it('should throw an error if the passwords do not match', async () => {
       await expect(
-        authService.changePassword(1, {
+        authService.updatePassword(1, {
           password1: newPassword2,
           password2: newPassword2 + '1',
           password: newPassword,
@@ -426,7 +432,7 @@ describe('AuthService', () => {
 
     it('should throw an error if the old password is incorrect', async () => {
       await expect(
-        authService.changePassword(1, {
+        authService.updatePassword(1, {
           password1: newPassword2,
           password2: newPassword2,
           password: newPassword + '1',
@@ -436,7 +442,7 @@ describe('AuthService', () => {
 
     it('should throw an error if password is the same as the old password', async () => {
       await expect(
-        authService.changePassword(1, {
+        authService.updatePassword(1, {
           password1: newPassword,
           password2: newPassword,
           password: newPassword,
@@ -445,7 +451,7 @@ describe('AuthService', () => {
     });
 
     it('should change the password', async () => {
-      const result = await authService.changePassword(1, {
+      const result = await authService.updatePassword(1, {
         password1: newPassword2,
         password2: newPassword2,
         password: newPassword,
