@@ -59,14 +59,20 @@ export class AuthService {
     return this.commonService.generateMessage('Registration successful');
   }
 
-  public async confirmEmail(dto: ConfirmEmailDto): Promise<IAuthResult> {
+  public async confirmEmail(
+    dto: ConfirmEmailDto,
+    domain?: string,
+  ): Promise<IAuthResult> {
     const { confirmationToken } = dto;
     const { id, version } = await this.jwtService.verifyToken<IEmailToken>(
       confirmationToken,
       TokenTypeEnum.CONFIRMATION,
     );
     const user = await this.usersService.confirmEmail(id, version);
-    const [accessToken, refreshToken] = await this.generateAuthTokens(user);
+    const [accessToken, refreshToken] = await this.generateAuthTokens(
+      user,
+      domain,
+    );
     return { user, accessToken, refreshToken };
   }
 
@@ -154,7 +160,7 @@ export class AuthService {
     return this.commonService.generateMessage('Password reset successful');
   }
 
-  public async changePassword(
+  public async updatePassword(
     userId: number,
     dto: ChangePasswordDto,
     domain?: string,

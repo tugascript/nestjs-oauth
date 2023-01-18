@@ -9,6 +9,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   Patch,
   Res,
@@ -20,6 +21,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Response } from 'express';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -65,16 +67,6 @@ export class UsersController {
     return ResponseUserMapper.map(user);
   }
 
-  @Get('/me')
-  @ApiOkResponse({
-    type: AuthResponseUserMapper,
-    description: 'The user is found and returned.',
-  })
-  public async getMe(@CurrentUser() id: number): Promise<IAuthResponseUser> {
-    const user = await this.usersService.findOneById(id);
-    return AuthResponseUserMapper.map(user);
-  }
-
   @Patch('/email')
   @ApiOkResponse({
     type: AuthResponseUserMapper,
@@ -82,6 +74,9 @@ export class UsersController {
   })
   @ApiBadRequestResponse({
     description: 'Something is invalid on the request body, or wrong password.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'The user is not logged in.',
   })
   public async updateEmail(
     @CurrentUser() id: number,
@@ -99,6 +94,9 @@ export class UsersController {
   @ApiBadRequestResponse({
     description: 'Something is invalid on the request body.',
   })
+  @ApiUnauthorizedResponse({
+    description: 'The user is not logged in.',
+  })
   public async updateUsername(
     @CurrentUser() id: number,
     @Body() dto: UsernameDto,
@@ -114,6 +112,9 @@ export class UsersController {
   @ApiBadRequestResponse({
     description: 'Something is invalid on the request body, or wrong password.',
   })
+  @ApiUnauthorizedResponse({
+    description: 'The user is not logged in.',
+  })
   public async deleteUser(
     @CurrentUser() id: number,
     @Body() dto: PasswordDto,
@@ -122,7 +123,7 @@ export class UsersController {
     await this.usersService.delete(id, dto);
     res
       .clearCookie(this.cookieName, { path: this.cookiePath })
-      .status(204)
+      .status(HttpStatus.NO_CONTENT)
       .send();
   }
 }

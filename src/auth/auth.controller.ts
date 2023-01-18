@@ -7,6 +7,9 @@
 import {
   Body,
   Controller,
+  Get,
+  HttpStatus,
+  Patch,
   Post,
   Req,
   Res,
@@ -26,14 +29,19 @@ import { Request, Response } from 'express';
 import { IMessage } from '../common/interfaces/message.interface';
 import { MessageMapper } from '../common/mappers/message.mapper';
 import { isUndefined } from '../common/utils/validation.util';
+import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
+import { CurrentUser } from './decorators/current-user.decorator';
 import { Origin } from './decorators/origin.decorator';
 import { Public } from './decorators/public.decorator';
+import { ChangePasswordDto } from './dtos/change-password.dto';
 import { ConfirmEmailDto } from './dtos/confirm-email.dto';
 import { EmailDto } from './dtos/email.dto';
 import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { SignInDto } from './dtos/sign-in.dto';
 import { SignUpDto } from './dtos/sign-up.dto';
+import { IAuthResponseUser } from './interfaces/auth-response-user.interface';
+import { AuthResponseUserMapper } from './mappers/auth-response-user.mapper';
 import { AuthResponseMapper } from './mappers/auth-response.mapper';
 
 @ApiTags('Auth')
@@ -47,6 +55,7 @@ export class AuthController {
 
   constructor(
     private readonly authService: AuthService,
+    private readonly usersService: UsersService,
     private readonly configService: ConfigService,
   ) {
     this.cookieName = this.configService.get<string>('COOKIE_NAME');
@@ -92,7 +101,7 @@ export class AuthController {
   ): Promise<void> {
     const result = await this.authService.signIn(singInDto, origin);
     this.saveRefreshCookie(res, result.refreshToken)
-      .status(200)
+      .status(HttpStatus.OK)
       .json(AuthResponseMapper.map(result));
   }
 
@@ -119,7 +128,7 @@ export class AuthController {
       req.headers.origin,
     );
     this.saveRefreshCookie(res, result.refreshToken)
-      .status(200)
+      .status(HttpStatus.OK)
       .json(AuthResponseMapper.map(result));
   }
 
@@ -142,7 +151,7 @@ export class AuthController {
     const message = await this.authService.logout(token);
     res
       .clearCookie(this.cookieName, { path: this.cookiePath })
-      .status(200)
+      .status(HttpStatus.OK)
       .json(message);
   }
 
@@ -160,12 +169,13 @@ export class AuthController {
       'Something is invalid on the request body, or Token is invalid or expired',
   })
   public async confirmEmail(
+    @Origin() origin: string | undefined,
     @Body() confirmEmailDto: ConfirmEmailDto,
     @Res() res: Response,
   ): Promise<void> {
     const result = await this.authService.confirmEmail(confirmEmailDto);
     this.saveRefreshCookie(res, result.refreshToken)
-      .status(200)
+      .status(HttpStatus.OK)
       .json(AuthResponseMapper.map(result));
   }
 
@@ -197,6 +207,43 @@ export class AuthController {
     @Body() resetPasswordDto: ResetPasswordDto,
   ): Promise<IMessage> {
     return this.authService.resetPassword(resetPasswordDto);
+  }
+
+  @Patch('/update-password')
+  @ApiOkResponse({
+    type: AuthResponseMapper,
+    description: 'The password has been updated',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'The user is not logged in.',
+  })
+  public async updatePassword(
+    @CurrentUser() userId: number,
+    @Origin() origin: string | undefined,
+    @Body() changePasswordDto: ChangePasswordDto,
+    @Res() res: Response,
+  ): Promise<void> {
+    const result = await this.authService.updatePassword(
+      userId,
+      changePasswordDto,
+      origin,
+    );
+    this.saveRefreshCookie(res, result.refreshToken)
+      .status(HttpStatus.OK)
+      .json(AuthResponseMapper.map(result));
+  }
+
+  @Get('/me')
+  @ApiOkResponse({
+    type: AuthResponseUserMapper,
+    description: 'The user is found and returned.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'The user is not logged in.',
+  })
+  public async getMe(@CurrentUser() id: number): Promise<IAuthResponseUser> {
+    const user = await this.usersService.findOneById(id);
+    return AuthResponseUserMapper.map(user);
   }
 
   private refreshTokenFromReq(req: Request): string {
