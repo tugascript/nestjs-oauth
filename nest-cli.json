@@ -4,11 +4,7 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "assets": [
-      {
-        "include": "mailer/templates/**/*",
-        "outDir": "dist/src",
-        "watchAssets": false
-      }
+      "mailer/templates/**/*"
     ],
     "watchAssets": true
   }

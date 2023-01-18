@@ -10,7 +10,6 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import { version } from '../package.json';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -31,7 +30,7 @@ async function bootstrap() {
   const swaggerConfig = new DocumentBuilder()
     .setTitle('NestJS Authentication API')
     .setDescription('A OAuth2.0 authentication API made with NestJS')
-    .setVersion(version)
+    .setVersion('0.0.1')
     .addBearerAuth()
     .addTag('Authentication API')
     .build();
