@@ -142,6 +142,11 @@ export class UsersService {
   ): Promise<UserEntity> {
     const user = await this.findOneById(userId);
     const formattedUsername = dto.username.toLowerCase();
+
+    if (user.username === formattedUsername) {
+      throw new BadRequestException('Username should be different');
+    }
+
     await this.checkUsernameUniqueness(formattedUsername);
     user.username = formattedUsername;
     await this.commonService.saveEntity(this.usersRepository, user);
@@ -192,6 +197,11 @@ export class UsersService {
     }
 
     const formattedEmail = email.toLowerCase();
+
+    if (user.email === formattedEmail) {
+      throw new BadRequestException('Email should be different');
+    }
+
     await this.checkEmailUniqueness(formattedEmail);
     user.email = formattedEmail;
     await this.commonService.saveEntity(this.usersRepository, user);
