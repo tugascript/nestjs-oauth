@@ -157,7 +157,7 @@ export class AuthService {
     );
     this.comparePasswords(password1, password2);
     await this.usersService.resetPassword(id, version, password1);
-    return this.commonService.generateMessage('Password reset successful');
+    return this.commonService.generateMessage('Password reset successfully');
   }
 
   public async updatePassword(
