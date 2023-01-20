@@ -26,6 +26,11 @@ export abstract class UpdateUserDto {
   )
   public username?: string;
 
+  @ApiProperty({
+    description: 'The new name',
+    example: 'John Doe',
+    type: String,
+  })
   @IsString()
   @Length(3, 100)
   @Matches(NAME_REGEX, {
