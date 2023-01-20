@@ -3,7 +3,7 @@
 ## Intro
 
 This is the source code for the
-tutorial [Nest Authentication with OAuth2.0](https://dev.to/tugascript/nestjs-authentication-with-oauth20-configuration-and-operations-41k).
+tutorial [Nest Authentication with OAuth2.0](https://dev.to/tugascript/nestjs-authentication-with-oauth20-express-local-oauth-rest-api-3hfj).
 This is the 2<sup>nd</sup> part on a 5 part series, where we will build a production level NestJS OAuth2 service.
 
 ### Contents
