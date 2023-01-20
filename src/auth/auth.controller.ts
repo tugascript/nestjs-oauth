@@ -8,6 +8,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   HttpStatus,
   Patch,
   Post,
@@ -20,6 +21,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
+  ApiCreatedResponse,
   ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -65,7 +67,7 @@ export class AuthController {
 
   @Public()
   @Post('/sign-up')
-  @ApiOkResponse({
+  @ApiCreatedResponse({
     type: MessageMapper,
     description: 'The user has been created and is waiting confirmation',
   })
@@ -79,7 +81,7 @@ export class AuthController {
     @Origin() origin: string | undefined,
     @Body() signUpDto: SignUpDto,
   ): Promise<IMessage> {
-    return this.authService.signUp(signUpDto, origin);
+    return await this.authService.signUp(signUpDto, origin);
   }
 
   @Public()
@@ -180,13 +182,14 @@ export class AuthController {
   }
 
   @Public()
-  @Post('/reset-password-email')
+  @Post('/forgot-password')
+  @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     type: MessageMapper,
     description:
       'An email has been sent to the user with the reset password link',
   })
-  public async resetPasswordEmail(
+  public async forgotPassword(
     @Origin() origin: string | undefined,
     @Body() emailDto: EmailDto,
   ): Promise<IMessage> {
@@ -195,6 +198,7 @@ export class AuthController {
 
   @Public()
   @Post('/reset-password')
+  @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     type: MessageMapper,
     description: 'The password has been reset',

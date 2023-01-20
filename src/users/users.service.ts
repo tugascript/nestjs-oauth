@@ -19,7 +19,7 @@ import { SLUG_REGEX } from '../common/consts/regex.const';
 import { isNull, isUndefined } from '../common/utils/validation.util';
 import { ChangeEmailDto } from './dtos/change-email.dto';
 import { PasswordDto } from './dtos/password.dto';
-import { UsernameDto } from './dtos/username.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserEntity } from './entities/user.entity';
 
 @Injectable()
@@ -136,19 +136,28 @@ export class UsersService {
     return user;
   }
 
-  public async updateUsername(
-    userId: number,
-    dto: UsernameDto,
-  ): Promise<UserEntity> {
+  public async update(userId: number, dto: UpdateUserDto): Promise<UserEntity> {
     const user = await this.findOneById(userId);
-    const formattedUsername = dto.username.toLowerCase();
+    const { name, username } = dto;
 
-    if (user.username === formattedUsername) {
-      throw new BadRequestException('Username should be different');
+    if (!isUndefined(name) && !isNull(name)) {
+      if (name === user.name) {
+        throw new BadRequestException('Name must be different');
+      }
+
+      user.name = this.commonService.formatName(name);
+    }
+    if (!isUndefined(username) && !isNull(username)) {
+      const formattedUsername = dto.username.toLowerCase();
+
+      if (user.username === formattedUsername) {
+        throw new BadRequestException('Username should be different');
+      }
+
+      await this.checkUsernameUniqueness(formattedUsername);
+      user.username = formattedUsername;
     }
 
-    await this.checkUsernameUniqueness(formattedUsername);
-    user.username = formattedUsername;
     await this.commonService.saveEntity(this.usersRepository, user);
     return user;
   }

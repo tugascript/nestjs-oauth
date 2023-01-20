@@ -165,7 +165,7 @@ describe('UsersService', () => {
   describe('update', () => {
     describe('username', () => {
       it('should update a user username', async () => {
-        const user = await service.updateUsername(1, {
+        const user = await service.update(1, {
           username: 'new-username',
         });
         expect(user).toBeInstanceOf(UserEntity);
@@ -174,7 +174,7 @@ describe('UsersService', () => {
 
       it('should throw a conflict exception', async () => {
         await expect(
-          service.updateUsername(2, { username: 'new-username' }),
+          service.update(2, { username: 'new-username' }),
         ).rejects.toThrowError('Username already in use');
       });
     });

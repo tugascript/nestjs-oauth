@@ -142,10 +142,10 @@ describe('UsersController', () => {
       });
     });
 
-    describe('update username', () => {
+    describe('update', () => {
       it('should throw an error if username is already taken', async () => {
         await expect(
-          controller.updateUsername(user.id, {
+          controller.updateUser(user.id, {
             username,
           }),
         ).rejects.toThrow('Username already in use');
@@ -153,7 +153,7 @@ describe('UsersController', () => {
 
       it('should throw an error if username is the same', async () => {
         await expect(
-          controller.updateUsername(user.id, {
+          controller.updateUser(user.id, {
             username: user.username,
           }),
         ).rejects.toThrow('Username should be different');
@@ -161,8 +161,16 @@ describe('UsersController', () => {
 
       it('should update username', async () => {
         await expect(
-          controller.updateUsername(user.id, {
+          controller.updateUser(user.id, {
             username: 'new_username',
+          }),
+        ).resolves.toBeInstanceOf(ResponseUserMapper);
+      });
+
+      it('should update name', async () => {
+        await expect(
+          controller.updateUser(user.id, {
+            name: faker.name.firstName(),
           }),
         ).resolves.toBeInstanceOf(ResponseUserMapper);
       });

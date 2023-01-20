@@ -31,7 +31,7 @@ import { AuthResponseUserMapper } from '../auth/mappers/auth-response-user.mappe
 import { ChangeEmailDto } from './dtos/change-email.dto';
 import { GetUserParams } from './dtos/get-user.params';
 import { PasswordDto } from './dtos/password.dto';
-import { UsernameDto } from './dtos/username.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
 import { IResponseUser } from './interfaces/response-user.interface';
 import { ResponseUserMapper } from './mappers/response-user.mapper';
 import { UsersService } from './users.service';
@@ -68,6 +68,25 @@ export class UsersController {
     return ResponseUserMapper.map(user);
   }
 
+  @Patch()
+  @ApiOkResponse({
+    type: ResponseUserMapper,
+    description: 'The username is updated.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Something is invalid on the request body.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'The user is not logged in.',
+  })
+  public async updateUser(
+    @CurrentUser() id: number,
+    @Body() dto: UpdateUserDto,
+  ): Promise<IResponseUser> {
+    const user = await this.usersService.update(id, dto);
+    return ResponseUserMapper.map(user);
+  }
+
   @Patch('/email')
   @ApiOkResponse({
     type: AuthResponseUserMapper,
@@ -85,25 +104,6 @@ export class UsersController {
   ): Promise<IAuthResponseUser> {
     const user = await this.usersService.updateEmail(id, dto);
     return AuthResponseUserMapper.map(user);
-  }
-
-  @Patch('/username')
-  @ApiOkResponse({
-    type: ResponseUserMapper,
-    description: 'The username is updated.',
-  })
-  @ApiBadRequestResponse({
-    description: 'Something is invalid on the request body.',
-  })
-  @ApiUnauthorizedResponse({
-    description: 'The user is not logged in.',
-  })
-  public async updateUsername(
-    @CurrentUser() id: number,
-    @Body() dto: UsernameDto,
-  ): Promise<IResponseUser> {
-    const user = await this.usersService.updateUsername(id, dto);
-    return ResponseUserMapper.map(user);
   }
 
   @Delete()

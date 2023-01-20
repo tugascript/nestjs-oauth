@@ -4,11 +4,11 @@
 
 This is the source code for the
 tutorial [Nest Authentication with OAuth2.0](https://dev.to/tugascript/nestjs-authentication-with-oauth20-configuration-and-operations-41k).
-This is the 1<sup>st</sup> part on a 5 part series, where we will build a production level NestJS OAuth2 service.
+This is the 2<sup>nd</sup> part on a 5 part series, where we will build a production level NestJS OAuth2 service.
 
 ### Contents
 
-This contains only the code for the services and can be adapter for any kind of API.
+This contains the code for an express based REST Authentication API.
 
 ## Local Setup
 
@@ -22,24 +22,30 @@ This contains only the code for the services and can be adapter for any kind of 
     $ yarn start:dev
     ```
 
-## Unit Testing
+## Testing
 
-**All tests:**
+**All Unit tests:**
 
 ```bash
-$ yarn run test
+$ yarn test
 ```
 
-**Individual test:**
+**Individual Unit test:**
 
 ```bash
-$ yarn run test service-name.service.spec.ts
+$ yarn test service-name.service.spec.ts
  ```
 
 **Coverage:**
 
 ```bash
-$ yarn run test:cov
+$ yarn test:cov
+```
+
+**E2E tests:**
+
+```bash
+$ yarn test:e2e
 ```
 
 ## License

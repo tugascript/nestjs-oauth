@@ -384,7 +384,7 @@ describe('AuthService', () => {
         password1: newPassword,
         password2: newPassword,
       });
-      expect(message.message).toStrictEqual('Password reset successful');
+      expect(message.message).toStrictEqual('Password reset successfully');
       expect(isUUID(message.id)).toBe(true);
     });
 

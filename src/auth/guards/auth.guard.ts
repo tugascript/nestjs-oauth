@@ -4,7 +4,12 @@
   Afonso Barracha
 */
 
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { isJWT } from 'class-validator';
 import { Request } from 'express';
@@ -25,10 +30,16 @@ export class AuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    return await this.setHttpHeader(
+    const activate = await this.setHttpHeader(
       context.switchToHttp().getRequest(),
       isPublic,
     );
+
+    if (!activate) {
+      throw new UnauthorizedException();
+    }
+
+    return activate;
   }
 
   /**

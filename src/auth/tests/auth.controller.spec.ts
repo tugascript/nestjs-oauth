@@ -286,9 +286,9 @@ describe('AuthController', () => {
     });
   });
 
-  describe('reset password email', () => {
+  describe('forgot password', () => {
     it('should return a message even if user does not exists', async () => {
-      const message = await controller.resetPasswordEmail(origin, {
+      const message = await controller.forgotPassword(origin, {
         email: faker.internet.email(),
       });
       expect(message).toBeInstanceOf(MessageMapper);
@@ -297,7 +297,7 @@ describe('AuthController', () => {
     });
 
     it('should send an email if user exists', async () => {
-      const message = await controller.resetPasswordEmail(origin, {
+      const message = await controller.forgotPassword(origin, {
         email,
       });
       expect(message).toBeInstanceOf(MessageMapper);
