@@ -1,4 +1,4 @@
-# Nest OAuth: Configuration and Operations
+# Nest OAuth: Express Local OAuth REST API
 
 ## Intro
 
