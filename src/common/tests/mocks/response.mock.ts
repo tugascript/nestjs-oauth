@@ -4,7 +4,7 @@
   Afonso Barracha
 */
 
-import { Response } from 'express';
+import { Response } from 'express-serve-static-core';
 
 class ResponseMock {
   public cookie = jest.fn().mockReturnThis();

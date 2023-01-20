@@ -4,7 +4,7 @@
   Afonso Barracha
 */
 
-import { Request } from 'express';
+import { Request } from 'express-serve-static-core';
 
 class RequestMock {
   public signedCookies: Record<string, string> = {};

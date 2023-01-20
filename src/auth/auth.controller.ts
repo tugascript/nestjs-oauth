@@ -27,7 +27,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import { Request, Response } from 'express';
+import { Request, Response } from 'express-serve-static-core';
 import { IMessage } from '../common/interfaces/message.interface';
 import { MessageMapper } from '../common/mappers/message.mapper';
 import { isUndefined } from '../common/utils/validation.util';

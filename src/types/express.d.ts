@@ -4,10 +4,10 @@
   Afonso Barracha
 */
 
-declare global {
-  namespace Express {
-    export interface Request {
-      user?: number;
-    }
+import { Request as ExpressRequest } from 'express';
+
+declare module 'express-serve-static-core' {
+  interface Request extends ExpressRequest {
+    user?: number;
   }
 }
