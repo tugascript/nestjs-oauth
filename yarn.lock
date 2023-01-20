@@ -6065,7 +6065,7 @@ __metadata:
     jest: 29.3.1
     joi: ^17.7.0
     jsonwebtoken: ^9.0.0
-    nestjs-throttler-storage-redis: ^0.2.2
+    nestjs-throttler-storage-redis: ^0.3.0
     nodemailer: ^6.9.0
     prettier: ^2.8.3
     reflect-metadata: ^0.1.13
@@ -6082,16 +6082,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"nestjs-throttler-storage-redis@npm:^0.2.2":
-  version: 0.2.2
-  resolution: "nestjs-throttler-storage-redis@npm:0.2.2"
+"nestjs-throttler-storage-redis@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "nestjs-throttler-storage-redis@npm:0.3.0"
   peerDependencies:
     "@nestjs/common": ">=7.0.0"
     "@nestjs/core": ">=7.0.0"
-    "@nestjs/throttler": ">=2.0.0"
+    "@nestjs/throttler": ">=4.0.0"
     ioredis: ^5.0.4
     reflect-metadata: ^0.1.13
-  checksum: cf90ded06d2210ef3c52c45afd8a2bb8da34e695d9c7ad602030e1422c40b0ae07a75ce3a2522c10fb42e87a7b6fe0561114051d809fd8c202f8cebdc9b98770
+  checksum: f40102e9908b97697d53185eca73b208b5104808da31f73523655dfa2f3d9d87beb03be8017a275a53b64649fa526eb7bdfbf9b42e605e2c4cceefed6debfc1c
   languageName: node
   linkType: hard
 
