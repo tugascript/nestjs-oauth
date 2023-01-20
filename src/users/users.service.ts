@@ -13,10 +13,13 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
+import { isInt } from 'class-validator';
 import { CommonService } from '../common/common.service';
+import { SLUG_REGEX } from '../common/consts/regex.const';
 import { isNull, isUndefined } from '../common/utils/validation.util';
 import { ChangeEmailDto } from './dtos/change-email.dto';
-import { UsernameDto } from './dtos/username.dto';
+import { PasswordDto } from './dtos/password.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserEntity } from './entities/user.entity';
 
 @Injectable()
@@ -43,6 +46,26 @@ export class UsersService {
     });
     await this.commonService.saveEntity(this.usersRepository, user, true);
     return user;
+  }
+
+  public async findOneByIdOrUsername(
+    idOrUsername: string,
+  ): Promise<UserEntity> {
+    const parsedValue = parseInt(idOrUsername, 10);
+
+    if (!isNaN(parsedValue) && parsedValue > 0 && isInt(parsedValue)) {
+      return this.findOneById(parsedValue);
+    }
+
+    if (
+      idOrUsername.length < 3 ||
+      idOrUsername.length > 106 ||
+      !SLUG_REGEX.test(idOrUsername)
+    ) {
+      throw new BadRequestException('Invalid username');
+    }
+
+    return this.findOneByUsername(idOrUsername);
   }
 
   public async findOneById(id: number): Promise<UserEntity> {
@@ -113,14 +136,28 @@ export class UsersService {
     return user;
   }
 
-  public async updateUsername(
-    userId: number,
-    dto: UsernameDto,
-  ): Promise<UserEntity> {
+  public async update(userId: number, dto: UpdateUserDto): Promise<UserEntity> {
     const user = await this.findOneById(userId);
-    const formattedUsername = dto.username.toLowerCase();
-    await this.checkUsernameUniqueness(formattedUsername);
-    user.username = formattedUsername;
+    const { name, username } = dto;
+
+    if (!isUndefined(name) && !isNull(name)) {
+      if (name === user.name) {
+        throw new BadRequestException('Name must be different');
+      }
+
+      user.name = this.commonService.formatName(name);
+    }
+    if (!isUndefined(username) && !isNull(username)) {
+      const formattedUsername = dto.username.toLowerCase();
+
+      if (user.username === formattedUsername) {
+        throw new BadRequestException('Username should be different');
+      }
+
+      await this.checkUsernameUniqueness(formattedUsername);
+      user.username = formattedUsername;
+    }
+
     await this.commonService.saveEntity(this.usersRepository, user);
     return user;
   }
@@ -169,14 +206,24 @@ export class UsersService {
     }
 
     const formattedEmail = email.toLowerCase();
+
+    if (user.email === formattedEmail) {
+      throw new BadRequestException('Email should be different');
+    }
+
     await this.checkEmailUniqueness(formattedEmail);
     user.email = formattedEmail;
     await this.commonService.saveEntity(this.usersRepository, user);
     return user;
   }
 
-  public async delete(userId: number): Promise<UserEntity> {
+  public async delete(userId: number, dto: PasswordDto): Promise<UserEntity> {
     const user = await this.findOneById(userId);
+
+    if (!(await compare(dto.password, user.password))) {
+      throw new BadRequestException('Wrong password');
+    }
+
     await this.commonService.removeEntity(this.usersRepository, user);
     return user;
   }

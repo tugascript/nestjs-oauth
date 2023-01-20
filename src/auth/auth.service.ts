@@ -59,14 +59,20 @@ export class AuthService {
     return this.commonService.generateMessage('Registration successful');
   }
 
-  public async confirmEmail(dto: ConfirmEmailDto): Promise<IAuthResult> {
+  public async confirmEmail(
+    dto: ConfirmEmailDto,
+    domain?: string,
+  ): Promise<IAuthResult> {
     const { confirmationToken } = dto;
     const { id, version } = await this.jwtService.verifyToken<IEmailToken>(
       confirmationToken,
       TokenTypeEnum.CONFIRMATION,
     );
     const user = await this.usersService.confirmEmail(id, version);
-    const [accessToken, refreshToken] = await this.generateAuthTokens(user);
+    const [accessToken, refreshToken] = await this.generateAuthTokens(
+      user,
+      domain,
+    );
     return { user, accessToken, refreshToken };
   }
 
@@ -151,10 +157,10 @@ export class AuthService {
     );
     this.comparePasswords(password1, password2);
     await this.usersService.resetPassword(id, version, password1);
-    return this.commonService.generateMessage('Password reset successful');
+    return this.commonService.generateMessage('Password reset successfully');
   }
 
-  public async changePassword(
+  public async updatePassword(
     userId: number,
     dto: ChangePasswordDto,
     domain?: string,
@@ -232,7 +238,7 @@ export class AuthService {
     exp: number,
   ): Promise<void> {
     const now = dayjs().unix();
-    const ttl = exp - now;
+    const ttl = (exp - now) * 1000;
 
     if (ttl > 0) {
       await this.commonService.throwInternalError(
