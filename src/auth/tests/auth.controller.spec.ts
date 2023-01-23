@@ -161,7 +161,7 @@ describe('AuthController', () => {
       );
       await controller.confirmEmail(origin, { confirmationToken: token }, res);
       expect(res.cookie).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalled();
+      expect(res.send).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       mockUser.credentials.version = 1;
     });
@@ -203,7 +203,7 @@ describe('AuthController', () => {
         password,
       });
       expect(res.cookie).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalled();
+      expect(res.send).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
     });
 
@@ -251,7 +251,7 @@ describe('AuthController', () => {
       req.setCookie(cookieName, token);
       await controller.refreshAccess(req, res);
       expect(res.cookie).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalled();
+      expect(res.send).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
     });
   });
@@ -282,7 +282,7 @@ describe('AuthController', () => {
       await controller.logout(req, res);
       expect(res.clearCookie).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalled();
+      expect(res.send).toHaveBeenCalled();
     });
   });
 
@@ -437,7 +437,7 @@ describe('AuthController', () => {
       );
       expect(res.cookie).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalled();
+      expect(res.send).toHaveBeenCalled();
     });
   });
 

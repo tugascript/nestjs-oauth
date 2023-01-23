@@ -1,14 +1,14 @@
-# Nest OAuth: Express Local OAuth REST API
+# Nest OAuth: Fastify Local OAuth REST API
 
 ## Intro
 
 This is the source code for the
 tutorial [Nest Authentication with OAuth2.0](https://dev.to/tugascript/nestjs-authentication-with-oauth20-express-local-oauth-rest-api-3hfj).
-This is the 2<sup>nd</sup> part on a 5 part series, where we will build a production level NestJS OAuth2 service.
+This is the 3<sup>rd</sup> part on a 5 part series, where we will build a production level NestJS OAuth2 service.
 
 ### Contents
 
-This contains the code for an express based REST Authentication API.
+This contains the code for an fastify based REST Authentication API.
 
 ## Local Setup
 
@@ -50,4 +50,4 @@ $ yarn test:e2e
 
 ## License
 
-The code of this tutorial is licensed under the GNU GPLv3 - see the [LICENSE](LICENSE) file for details.
+The code of this tutorial is licensed under the GNU LGPLv3 - see the [LICENSE](LICENSE) file for details.

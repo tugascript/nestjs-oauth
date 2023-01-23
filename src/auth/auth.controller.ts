@@ -26,11 +26,10 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ThrottlerGuard } from '@nestjs/throttler';
-import { Request, Response } from 'express-serve-static-core';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { IMessage } from '../common/interfaces/message.interface';
 import { MessageMapper } from '../common/mappers/message.mapper';
-import { isUndefined } from '../common/utils/validation.util';
+import { isNull, isUndefined } from '../common/utils/validation.util';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -42,13 +41,14 @@ import { EmailDto } from './dtos/email.dto';
 import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { SignInDto } from './dtos/sign-in.dto';
 import { SignUpDto } from './dtos/sign-up.dto';
+import { FastifyThrottlerGuard } from './guards/fastify-throttler.guard';
 import { IAuthResponseUser } from './interfaces/auth-response-user.interface';
 import { AuthResponseUserMapper } from './mappers/auth-response-user.mapper';
 import { AuthResponseMapper } from './mappers/auth-response.mapper';
 
 @ApiTags('Auth')
 @Controller('api/auth')
-@UseGuards(ThrottlerGuard)
+@UseGuards(FastifyThrottlerGuard)
 export class AuthController {
   private readonly cookiePath = '/api/auth';
   private readonly cookieName: string;
@@ -97,14 +97,15 @@ export class AuthController {
     description: 'Invalid credentials or User is not confirmed',
   })
   public async signIn(
-    @Res() res: Response,
+    @Res() res: FastifyReply,
     @Origin() origin: string | undefined,
     @Body() singInDto: SignInDto,
   ): Promise<void> {
     const result = await this.authService.signIn(singInDto, origin);
     this.saveRefreshCookie(res, result.refreshToken)
       .status(HttpStatus.OK)
-      .json(AuthResponseMapper.map(result));
+      .header('Content-Type', 'application/json')
+      .send(AuthResponseMapper.map(result));
   }
 
   @Public()
@@ -121,8 +122,8 @@ export class AuthController {
       'Something is invalid on the request body, or Token is invalid or expired',
   })
   public async refreshAccess(
-    @Req() req: Request,
-    @Res() res: Response,
+    @Req() req: FastifyRequest,
+    @Res() res: FastifyReply,
   ): Promise<void> {
     const token = this.refreshTokenFromReq(req);
     const result = await this.authService.refreshTokenAccess(
@@ -131,7 +132,8 @@ export class AuthController {
     );
     this.saveRefreshCookie(res, result.refreshToken)
       .status(HttpStatus.OK)
-      .json(AuthResponseMapper.map(result));
+      .header('Content-Type', 'application/json')
+      .send(AuthResponseMapper.map(result));
   }
 
   @Post('/logout')
@@ -146,15 +148,16 @@ export class AuthController {
     description: 'Invalid token',
   })
   public async logout(
-    @Req() req: Request,
-    @Res() res: Response,
+    @Req() req: FastifyRequest,
+    @Res() res: FastifyReply,
   ): Promise<void> {
     const token = this.refreshTokenFromReq(req);
     const message = await this.authService.logout(token);
     res
       .clearCookie(this.cookieName, { path: this.cookiePath })
       .status(HttpStatus.OK)
-      .json(message);
+      .header('Content-Type', 'application/json')
+      .send(message);
   }
 
   @Public()
@@ -173,12 +176,13 @@ export class AuthController {
   public async confirmEmail(
     @Origin() origin: string | undefined,
     @Body() confirmEmailDto: ConfirmEmailDto,
-    @Res() res: Response,
+    @Res() res: FastifyReply,
   ): Promise<void> {
     const result = await this.authService.confirmEmail(confirmEmailDto);
     this.saveRefreshCookie(res, result.refreshToken)
       .status(HttpStatus.OK)
-      .json(AuthResponseMapper.map(result));
+      .header('Content-Type', 'application/json')
+      .send(AuthResponseMapper.map(result));
   }
 
   @Public()
@@ -225,7 +229,7 @@ export class AuthController {
     @CurrentUser() userId: number,
     @Origin() origin: string | undefined,
     @Body() changePasswordDto: ChangePasswordDto,
-    @Res() res: Response,
+    @Res() res: FastifyReply,
   ): Promise<void> {
     const result = await this.authService.updatePassword(
       userId,
@@ -234,7 +238,8 @@ export class AuthController {
     );
     this.saveRefreshCookie(res, result.refreshToken)
       .status(HttpStatus.OK)
-      .json(AuthResponseMapper.map(result));
+      .header('Content-Type', 'application/json')
+      .send(AuthResponseMapper.map(result));
   }
 
   @Get('/me')
@@ -250,21 +255,29 @@ export class AuthController {
     return AuthResponseUserMapper.map(user);
   }
 
-  private refreshTokenFromReq(req: Request): string {
-    const token: string | undefined = req.signedCookies[this.cookieName];
+  private refreshTokenFromReq(req: FastifyRequest): string {
+    const token: string | undefined = req.cookies[this.cookieName];
 
-    if (isUndefined(token)) {
+    if (isUndefined(token) || isNull(token)) {
       throw new UnauthorizedException();
     }
 
-    return token;
+    const { valid, value } = req.unsignCookie(token);
+
+    if (!valid) {
+      throw new UnauthorizedException();
+    }
+
+    return value;
   }
 
-  private saveRefreshCookie(res: Response, refreshToken: string): Response {
+  private saveRefreshCookie(
+    res: FastifyReply,
+    refreshToken: string,
+  ): FastifyReply {
     return res.cookie(this.cookieName, refreshToken, {
       secure: !this.testing,
       httpOnly: true,
-      sameSite: 'strict',
       signed: true,
       path: this.cookiePath,
       expires: new Date(Date.now() + this.refreshTime * 1000),
