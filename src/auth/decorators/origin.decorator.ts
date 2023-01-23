@@ -5,10 +5,10 @@
 */
 
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { Request } from 'express-serve-static-core';
+import { FastifyRequest } from 'fastify';
 
 export const Origin = createParamDecorator(
   (_, context: ExecutionContext): string | undefined => {
-    return context.switchToHttp().getRequest<Request>().headers?.origin;
+    return context.switchToHttp().getRequest<FastifyRequest>().headers?.origin;
   },
 );

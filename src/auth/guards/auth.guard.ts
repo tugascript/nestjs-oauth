@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { isJWT } from 'class-validator';
-import { Request } from 'express';
+import { FastifyRequest } from 'fastify';
 import { isNull, isUndefined } from '../../common/utils/validation.util';
 import { TokenTypeEnum } from '../../jwt/enums/token-type.enum';
 import { JwtService } from '../../jwt/jwt.service';
@@ -31,7 +31,7 @@ export class AuthGuard implements CanActivate {
       context.getClass(),
     ]);
     const activate = await this.setHttpHeader(
-      context.switchToHttp().getRequest(),
+      context.switchToHttp().getRequest<FastifyRequest>(),
       isPublic,
     );
 
@@ -48,7 +48,7 @@ export class AuthGuard implements CanActivate {
    * Checks if the header has a valid Bearer token, validates it and sets the User ID as the user.
    */
   private async setHttpHeader(
-    req: Request,
+    req: FastifyRequest,
     isPublic: boolean,
   ): Promise<boolean> {
     const auth = req.headers?.authorization;
@@ -73,7 +73,7 @@ export class AuthGuard implements CanActivate {
         token,
         TokenTypeEnum.ACCESS,
       );
-      req['user'] = id;
+      req.user = id;
       return true;
     } catch (_) {
       return isPublic;
