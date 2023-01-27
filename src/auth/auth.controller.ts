@@ -104,7 +104,6 @@ export class AuthController {
     const result = await this.authService.signIn(singInDto, origin);
     this.saveRefreshCookie(res, result.refreshToken)
       .status(HttpStatus.OK)
-      .header('Content-Type', 'application/json')
       .send(AuthResponseMapper.map(result));
   }
 
@@ -132,7 +131,6 @@ export class AuthController {
     );
     this.saveRefreshCookie(res, result.refreshToken)
       .status(HttpStatus.OK)
-      .header('Content-Type', 'application/json')
       .send(AuthResponseMapper.map(result));
   }
 
@@ -155,8 +153,8 @@ export class AuthController {
     const message = await this.authService.logout(token);
     res
       .clearCookie(this.cookieName, { path: this.cookiePath })
-      .status(HttpStatus.OK)
       .header('Content-Type', 'application/json')
+      .status(HttpStatus.OK)
       .send(message);
   }
 
@@ -181,7 +179,6 @@ export class AuthController {
     const result = await this.authService.confirmEmail(confirmEmailDto);
     this.saveRefreshCookie(res, result.refreshToken)
       .status(HttpStatus.OK)
-      .header('Content-Type', 'application/json')
       .send(AuthResponseMapper.map(result));
   }
 
@@ -238,7 +235,6 @@ export class AuthController {
     );
     this.saveRefreshCookie(res, result.refreshToken)
       .status(HttpStatus.OK)
-      .header('Content-Type', 'application/json')
       .send(AuthResponseMapper.map(result));
   }
 
@@ -275,12 +271,14 @@ export class AuthController {
     res: FastifyReply,
     refreshToken: string,
   ): FastifyReply {
-    return res.cookie(this.cookieName, refreshToken, {
-      secure: !this.testing,
-      httpOnly: true,
-      signed: true,
-      path: this.cookiePath,
-      expires: new Date(Date.now() + this.refreshTime * 1000),
-    });
+    return res
+      .cookie(this.cookieName, refreshToken, {
+        secure: !this.testing,
+        httpOnly: true,
+        signed: true,
+        path: this.cookiePath,
+        expires: new Date(Date.now() + this.refreshTime * 1000),
+      })
+      .header('Content-Type', 'application/json');
   }
 }
