@@ -9,12 +9,8 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 import { Request } from 'express-serve-static-core';
 import { IContext } from '../../config/interfaces/context.interface';
 
-export const CurrentUser = createParamDecorator(
-  (_, context: ExecutionContext): number | undefined => {
-    if (context.getType() === 'http') {
-      return context.switchToHttp().getRequest<Request>()?.user;
-    }
-
-    return GqlExecutionContext.create(context).getContext<IContext>().req?.user;
+export const GqlReq = createParamDecorator(
+  (_, context: ExecutionContext): Request => {
+    return GqlExecutionContext.create(context).getContext<IContext>().req;
   },
 );
