@@ -5,6 +5,7 @@
 */
 
 import { Embedded, Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { IsBoolean, IsEmail, IsString, Length, Matches } from 'class-validator';
 import {
   BCRYPT_HASH,
@@ -14,11 +15,14 @@ import {
 import { CredentialsEmbeddable } from '../embeddables/credentials.embeddable';
 import { IUser } from '../interfaces/user.interface';
 
+@ObjectType('User')
 @Entity({ tableName: 'users' })
 export class UserEntity implements IUser {
+  @Field(() => Int)
   @PrimaryKey()
   public id: number;
 
+  @Field(() => String)
   @Property({ columnType: 'varchar', length: 100 })
   @IsString()
   @Length(3, 100)
@@ -27,14 +31,16 @@ export class UserEntity implements IUser {
   })
   public name: string;
 
+  @Field(() => String)
   @Property({ columnType: 'varchar', length: 106 })
   @IsString()
   @Length(3, 106)
   @Matches(SLUG_REGEX, {
-    message: 'Username must be a valid slugs',
+    message: 'Username must be a valid slug',
   })
   public username: string;
 
+  @Field(() => String, { nullable: true })
   @Property({ columnType: 'varchar', length: 255 })
   @IsString()
   @IsEmail()

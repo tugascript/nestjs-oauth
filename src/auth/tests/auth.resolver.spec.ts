@@ -5,20 +5,20 @@
 */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { LoadersService } from '../loaders.service';
+import { AuthResolver } from '../auth.resolver';
 
-describe('LoadersService', () => {
-  let service: LoadersService;
+describe('AuthResolver', () => {
+  let resolver: AuthResolver;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [LoadersService],
+      providers: [AuthResolver],
     }).compile();
 
-    service = module.get<LoadersService>(LoadersService);
+    resolver = module.get<AuthResolver>(AuthResolver);
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(resolver).toBeDefined();
   });
 });

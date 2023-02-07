@@ -4,10 +4,13 @@
   Afonso Barracha
 */
 
+import { ArgsType, Field } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsJWT, IsString } from 'class-validator';
 
+@ArgsType()
 export abstract class ConfirmEmailDto {
+  @Field(() => String)
   @ApiProperty({
     description: 'The JWT token sent to the user email',
     example:

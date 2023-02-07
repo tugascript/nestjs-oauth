@@ -23,7 +23,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Response } from 'express';
+import { Response } from 'express-serve-static-core';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import { IAuthResponseUser } from '../auth/interfaces/auth-response-user.interface';
@@ -39,8 +39,8 @@ import { UsersService } from './users.service';
 @ApiTags('Users')
 @Controller('api/users')
 export class UsersController {
-  private cookiePath = '/api/auth';
-  private cookieName: string;
+  private readonly cookiePath = '/api/auth';
+  private readonly cookieName: string;
 
   constructor(
     private readonly usersService: UsersService,

@@ -4,10 +4,13 @@
   Afonso Barracha
 */
 
+import { ArgsType, Field } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, MinLength } from 'class-validator';
 
+@ArgsType()
 export abstract class PasswordDto {
+  @Field(() => String)
   @ApiProperty({
     description: 'The password of the user',
     minLength: 1,

@@ -162,6 +162,36 @@ export class UsersService {
     return user;
   }
 
+  public async updateName(userId: number, name: string): Promise<UserEntity> {
+    const user = await this.findOneById(userId);
+    const formattedName = this.commonService.formatName(name);
+
+    if (user.name === formattedName) {
+      throw new BadRequestException('Name must be different');
+    }
+
+    user.name = formattedName;
+    await this.commonService.saveEntity(this.usersRepository, user);
+    return user;
+  }
+
+  public async updateUsername(
+    userId: number,
+    username: string,
+  ): Promise<UserEntity> {
+    const user = await this.findOneById(userId);
+    const formattedUsername = username.toLowerCase();
+
+    if (user.username === formattedUsername) {
+      throw new BadRequestException('Username should be different');
+    }
+
+    await this.checkUsernameUniqueness(formattedUsername);
+    user.username = formattedUsername;
+    await this.commonService.saveEntity(this.usersRepository, user);
+    return user;
+  }
+
   public async updatePassword(
     userId: number,
     password: string,
