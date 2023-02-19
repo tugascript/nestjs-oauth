@@ -4,4 +4,15 @@
   Afonso Barracha
 */
 
-export interface ILoaders {}
+import DataLoader from 'dataloader';
+import { IUser } from '../../users/interfaces/user.interface';
+import { IFederatedInstance } from './federated-instance.interface';
+import { ILoader } from './loader.interface';
+
+export interface ILoaders {
+  userLoader: DataLoader<
+    ILoader<IFederatedInstance>,
+    IUser,
+    ILoader<IFederatedInstance>
+  >;
+}

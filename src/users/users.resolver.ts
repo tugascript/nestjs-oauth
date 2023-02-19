@@ -5,13 +5,22 @@
 */
 
 import { ConfigService } from '@nestjs/config';
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Mutation,
+  Query,
+  Resolver,
+  ResolveReference,
+} from '@nestjs/graphql';
 import { Response } from 'express-serve-static-core';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { GqlRes } from '../auth/decorators/gql-res.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import { IdDto } from '../common/dtos/id.dto';
 import { MessageType } from '../common/entities/gql/message.type';
+import { Loaders } from '../loaders/decorators/loaders.decorator';
+import { IFederatedInstance } from '../loaders/interfaces/federated-instance.interface';
+import { ILoaders } from '../loaders/interfaces/loaders.interface';
 import { ChangeEmailDto } from './dtos/change-email.dto';
 import { NameDto } from './dtos/name.dto';
 import { PasswordDto } from './dtos/password.dto';
@@ -78,5 +87,13 @@ export class UsersResolver {
     await this.usersService.delete(id, passwordDto);
     res.clearCookie(this.cookieName, { path: this.cookiePath });
     return new MessageType('User deleted successfully');
+  }
+
+  @ResolveReference()
+  public resolveReference(
+    @Loaders() loaders: ILoaders,
+    reference: IFederatedInstance,
+  ) {
+    return loaders.userLoader.load({ obj: reference, params: undefined });
   }
 }

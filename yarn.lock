@@ -62,6 +62,40 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@apollo/cache-control-types@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@apollo/cache-control-types@npm:1.0.2"
+  peerDependencies:
+    graphql: 14.x || 15.x || 16.x
+  checksum: 1e00c57b45fbd8656c96cdcd254658f332c1955bd8db9274c665e1c6ef8ac881a6b6a3f953b60638ae5f59fdfce6b005adb9a5b945b694903579a9665499e823
+  languageName: node
+  linkType: hard
+
+"@apollo/federation-internals@npm:2.3.2":
+  version: 2.3.2
+  resolution: "@apollo/federation-internals@npm:2.3.2"
+  dependencies:
+    chalk: ^4.1.0
+    js-levenshtein: ^1.1.6
+  peerDependencies:
+    graphql: ^16.5.0
+  checksum: 9f52120d30230a0021547f170a7432c8fcb505e1ea3b677543e77aacf3a3e6f3297154ae93090e8713814e20ec970646b5c12d34b28267d856190782a174b485
+  languageName: node
+  linkType: hard
+
+"@apollo/federation@npm:^0.38.1":
+  version: 0.38.1
+  resolution: "@apollo/federation@npm:0.38.1"
+  dependencies:
+    "@apollo/subgraph": ^0.6.1
+    apollo-server-types: ^3.0.2
+    lodash.xorby: ^4.7.0
+  peerDependencies:
+    graphql: ^15.8.0 || ^16.0.0
+  checksum: 44b3a1b7d2c88ee1947de7bafd594b6d84eeeab6776bb21209200d2862b843c3a6742a6973ae4c8062e788005e348feacc151aee733fbcd2599377ef1f712cb1
+  languageName: node
+  linkType: hard
+
 "@apollo/protobufjs@npm:1.2.6":
   version: 1.2.6
   resolution: "@apollo/protobufjs@npm:1.2.6"
@@ -106,6 +140,29 @@ __metadata:
     apollo-pbjs: bin/pbjs
     apollo-pbts: bin/pbts
   checksum: e01a33984ae06d6679f6796bb44e55260112ddd090ebc9f87d3f952c45153dd5df5c91ac4bf91ba60fb72ff8c1218059ce4bf8bb2eb08c5049c783de0098eec0
+  languageName: node
+  linkType: hard
+
+"@apollo/subgraph@npm:^0.6.1":
+  version: 0.6.1
+  resolution: "@apollo/subgraph@npm:0.6.1"
+  dependencies:
+    "@apollo/cache-control-types": ^1.0.2
+  peerDependencies:
+    graphql: ^15.8.0 || ^16.0.0
+  checksum: 84ecb35d7c93a8d6194cc0c3d154172ab42dffff6227777c90e9f02b9f769d0f4dc9503ca9fdb23f447c7ceaa9125617bc971f4211c6af9f52f1fe63d28f8a14
+  languageName: node
+  linkType: hard
+
+"@apollo/subgraph@npm:^2.3.2":
+  version: 2.3.2
+  resolution: "@apollo/subgraph@npm:2.3.2"
+  dependencies:
+    "@apollo/cache-control-types": ^1.0.2
+    "@apollo/federation-internals": 2.3.2
+  peerDependencies:
+    graphql: ^16.5.0
+  checksum: 047bf80079d58f57f7c93c99735375899528e46189f1a1bb9ce12114c66716ca49d02b941694a2f8167e1c6a1054a51ba85255e5052422605713c8c450f57a75
   languageName: node
   linkType: hard
 
@@ -2943,7 +3000,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"apollo-server-types@npm:^3.7.1":
+"apollo-server-types@npm:^3.0.2, apollo-server-types@npm:^3.7.1":
   version: 3.7.1
   resolution: "apollo-server-types@npm:3.7.1"
   dependencies:
@@ -3868,6 +3925,13 @@ __metadata:
   version: 0.0.10
   resolution: "cssfilter@npm:0.0.10"
   checksum: bc2c52bbb3426c3f2e4832edb6f8573e6cfa65b40b540932762d1e018f0f0157725e2991b77344bbc8266c6bbf4daa2803b0707cfb1bd0877505bf83a68e4b04
+  languageName: node
+  linkType: hard
+
+"dataloader@npm:^2.2.2":
+  version: 2.2.2
+  resolution: "dataloader@npm:2.2.2"
+  checksum: 4dabd247089c29f194e94d5434d504f99156c5c214a03463c20f3f17f40398d7e179edee69a27c16e315519ac8739042a810090087ae26449a0e685156a02c65
   languageName: node
   linkType: hard
 
@@ -6079,6 +6143,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"js-levenshtein@npm:^1.1.6":
+  version: 1.1.6
+  resolution: "js-levenshtein@npm:1.1.6"
+  checksum: 409f052a7f1141be4058d97da7860e08efd97fc588b7a4c5cfa0548bc04f6d576644dae65ab630266dff685d56fb90d494e03d4d79cb484c287746b4f1bf0694
+  languageName: node
+  linkType: hard
+
 "js-sdsl@npm:^4.1.4":
   version: 4.2.0
   resolution: "js-sdsl@npm:4.2.0"
@@ -6363,6 +6434,13 @@ __metadata:
   version: 4.7.0
   resolution: "lodash.sortby@npm:4.7.0"
   checksum: db170c9396d29d11fe9a9f25668c4993e0c1331bcb941ddbd48fb76f492e732add7f2a47cfdf8e9d740fa59ac41bbfaf931d268bc72aab3ab49e9f89354d718c
+  languageName: node
+  linkType: hard
+
+"lodash.xorby@npm:^4.7.0":
+  version: 4.7.0
+  resolution: "lodash.xorby@npm:4.7.0"
+  checksum: 397a97d5b60556bb05c7deebd2a130880c4f7b3a72d95a1d6a8efacfa223086decfc51c5dc94f53503017d4c9255f6788c3c56e2b9c66305f29b13e636188509
   languageName: node
   linkType: hard
 
@@ -6845,6 +6923,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "nest-local-oauth@workspace:."
   dependencies:
+    "@apollo/federation": ^0.38.1
+    "@apollo/subgraph": ^2.3.2
     "@faker-js/faker": ^7.6.0
     "@mikro-orm/cli": ^5.6.7
     "@mikro-orm/core": ^5.6.7
@@ -6883,6 +6963,7 @@ __metadata:
     class-transformer: ^0.5.1
     class-validator: ^0.14.0
     cookie-parser: ^1.4.6
+    dataloader: ^2.2.2
     dayjs: ^1.11.7
     eslint: ^8.32.0
     eslint-config-prettier: ^8.6.0

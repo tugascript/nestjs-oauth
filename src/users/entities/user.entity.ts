@@ -5,7 +5,7 @@
 */
 
 import { Embedded, Entity, PrimaryKey, Property } from '@mikro-orm/core';
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, Int, ObjectType } from '@nestjs/graphql';
 import { IsBoolean, IsEmail, IsString, Length, Matches } from 'class-validator';
 import {
   BCRYPT_HASH,
@@ -14,8 +14,10 @@ import {
 } from '../../common/consts/regex.const';
 import { CredentialsEmbeddable } from '../embeddables/credentials.embeddable';
 import { IUser } from '../interfaces/user.interface';
+import { privateMiddleware } from '../middleware/private.middleware';
 
 @ObjectType('User')
+@Directive('@key(fields: "id")')
 @Entity({ tableName: 'users' })
 export class UserEntity implements IUser {
   @Field(() => Int)
@@ -40,7 +42,7 @@ export class UserEntity implements IUser {
   })
   public username: string;
 
-  @Field(() => String, { nullable: true })
+  @Field(() => String, { nullable: true, middleware: [privateMiddleware] })
   @Property({ columnType: 'varchar', length: 255 })
   @IsString()
   @IsEmail()

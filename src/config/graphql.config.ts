@@ -16,7 +16,9 @@ export class GraphQLConfig implements GqlOptionsFactory {
   constructor(
     private readonly configService: ConfigService,
     private readonly loadersService: LoadersService,
-  ) {}
+  ) {
+    this.testing = this.configService.get('testing');
+  }
 
   public createGqlOptions(): ApolloDriverConfig {
     return {
@@ -24,6 +26,7 @@ export class GraphQLConfig implements GqlOptionsFactory {
       context: ({ req, res }): IContext => ({
         req,
         res,
+        loaders: this.loadersService.getLoaders(),
       }),
       path: '/api/graphql',
       autoSchemaFile: './schema.gql',
