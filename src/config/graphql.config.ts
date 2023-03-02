@@ -7,16 +7,12 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ConfigService } from '@nestjs/config';
 import { GqlOptionsFactory } from '@nestjs/graphql';
-import { LoadersService } from '../loaders/loaders.service';
 import { IContext } from './interfaces/context.interface';
 
 export class GraphQLConfig implements GqlOptionsFactory {
   private readonly testing: boolean;
 
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly loadersService: LoadersService,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     this.testing = this.configService.get('testing');
   }
 
@@ -26,7 +22,6 @@ export class GraphQLConfig implements GqlOptionsFactory {
       context: ({ req, res }): IContext => ({
         req,
         res,
-        loaders: this.loadersService.getLoaders(),
       }),
       path: '/api/graphql',
       autoSchemaFile: './schema.gql',

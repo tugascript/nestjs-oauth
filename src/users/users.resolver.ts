@@ -18,9 +18,8 @@ import { GqlRes } from '../auth/decorators/gql-res.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import { IdDto } from '../common/dtos/id.dto';
 import { MessageType } from '../common/entities/gql/message.type';
-import { Loaders } from '../loaders/decorators/loaders.decorator';
 import { IFederatedInstance } from '../loaders/interfaces/federated-instance.interface';
-import { ILoaders } from '../loaders/interfaces/loaders.interface';
+import { LoadersService } from '../loaders/loaders.service';
 import { ChangeEmailDto } from './dtos/change-email.dto';
 import { NameDto } from './dtos/name.dto';
 import { PasswordDto } from './dtos/password.dto';
@@ -36,6 +35,7 @@ export class UsersResolver {
   constructor(
     private readonly usersService: UsersService,
     private readonly configService: ConfigService,
+    private readonly loadersService: LoadersService,
   ) {
     this.cookieName = this.configService.get<string>('REFRESH_COOKIE');
   }
@@ -90,10 +90,10 @@ export class UsersResolver {
   }
 
   @ResolveReference()
-  public resolveReference(
-    @Loaders() loaders: ILoaders,
-    reference: IFederatedInstance,
-  ) {
-    return loaders.userLoader.load({ obj: reference, params: undefined });
+  public resolveReference(reference: IFederatedInstance) {
+    return this.loadersService.userLoader.load({
+      obj: reference,
+      params: undefined,
+    });
   }
 }

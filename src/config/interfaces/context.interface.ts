@@ -5,10 +5,8 @@
 */
 
 import { Request, Response } from 'express-serve-static-core';
-import { ILoaders } from '../../loaders/interfaces/loaders.interface';
 
 export interface IContext {
   req: Request;
   res: Response;
-  loaders: ILoaders;
 }
