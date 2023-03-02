@@ -41,7 +41,7 @@ import { UsersModule } from './users/users.module';
       useClass: CacheConfig,
     }),
     GraphQLModule.forRootAsync({
-      imports: [ConfigModule, LoadersModule],
+      imports: [ConfigModule],
       driver: ApolloDriver,
       useClass: GraphQLConfig,
     }),

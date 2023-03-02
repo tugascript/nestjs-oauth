@@ -4,9 +4,10 @@
   Afonso Barracha
 */
 
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { LoadersService } from './loaders.service';
 
+@Global()
 @Module({
   providers: [LoadersService],
   exports: [LoadersService],
