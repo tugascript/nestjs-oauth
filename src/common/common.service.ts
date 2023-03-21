@@ -4,7 +4,8 @@
   Afonso Barracha
 */
 
-import { Dictionary, EntityRepository } from '@mikro-orm/core';
+import { Dictionary } from '@mikro-orm/core';
+import { SqlEntityRepository } from '@mikro-orm/postgresql';
 import {
   BadRequestException,
   ConflictException,
@@ -65,7 +66,7 @@ export class CommonService {
    * Validates, saves and flushes entities into the DB
    */
   public async saveEntity<T extends Dictionary>(
-    repo: EntityRepository<T>,
+    repo: SqlEntityRepository<T>,
     entity: T,
     isNew = false,
   ): Promise<void> {
@@ -84,7 +85,7 @@ export class CommonService {
    * Removes an entities from the DB.
    */
   public async removeEntity<T extends Dictionary>(
-    repo: EntityRepository<T>,
+    repo: SqlEntityRepository<T>,
     entity: T,
   ): Promise<void> {
     await this.throwInternalError(repo.removeAndFlush(entity));

@@ -5,7 +5,7 @@
 */
 
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
+import { SqlEntityRepository } from '@mikro-orm/postgresql';
 import {
   BadRequestException,
   ConflictException,
@@ -26,7 +26,7 @@ import { UserEntity } from './entities/user.entity';
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
-    private readonly usersRepository: EntityRepository<UserEntity>,
+    private readonly usersRepository: SqlEntityRepository<UserEntity>,
     private readonly commonService: CommonService,
   ) {}
 

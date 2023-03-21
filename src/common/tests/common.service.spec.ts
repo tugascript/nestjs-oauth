@@ -4,7 +4,6 @@
   Afonso Barracha
 */
 
-import { EntityRepository } from '@mikro-orm/postgresql';
 import { InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommonService } from '../common.service';
@@ -73,8 +72,7 @@ describe('CommonService', () => {
   });
 
   describe('entity actions', () => {
-    const repository =
-      new EntityRepositoryMock() as unknown as EntityRepository<EntityMock>;
+    const repository = new EntityRepositoryMock() as any;
     const entity = new EntityMock('Valid Name');
 
     it('check entity existence', () => {

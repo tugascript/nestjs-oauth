@@ -157,7 +157,6 @@ export class AuthResolver {
     res.cookie(this.cookieName, refreshToken, {
       secure: !this.testing,
       httpOnly: true,
-      sameSite: 'strict',
       signed: true,
       path: this.cookiePath,
       expires: new Date(Date.now() + this.refreshTime * 1000),
