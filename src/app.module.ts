@@ -20,7 +20,6 @@ import { validationSchema } from './config/config.schema';
 import { GraphQLConfig } from './config/graphql.config';
 import { MikroOrmConfig } from './config/mikroorm.config';
 import { JwtModule } from './jwt/jwt.module';
-import { LoadersModule } from './loaders/loaders.module';
 import { MailerModule } from './mailer/mailer.module';
 import { UsersModule } from './users/users.module';
 
@@ -50,7 +49,6 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     JwtModule,
     MailerModule,
-    LoadersModule,
   ],
   providers: [
     AppService,

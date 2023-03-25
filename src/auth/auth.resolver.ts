@@ -6,7 +6,7 @@
 
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Request, Response } from 'express-serve-static-core';
 import { MessageType } from '../common/entities/gql/message.type';
 import { IMessage } from '../common/interfaces/message.interface';
@@ -15,8 +15,6 @@ import { UserEntity } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
-import { GqlReq } from './decorators/gql-req.decorator';
-import { GqlRes } from './decorators/gql-res.decorator';
 import { Origin } from './decorators/origin.decorator';
 import { Public } from './decorators/public.decorator';
 import { ConfirmEmailDto } from './dtos/confirm-email.dto';
@@ -56,7 +54,7 @@ export class AuthResolver {
   @Public()
   @Mutation(() => AuthType)
   public async signIn(
-    @GqlRes() res: Response,
+    @Context('res') res: Response,
     @Origin() origin: string | undefined,
     @Args('input') signInInput: SignInInput,
   ): Promise<AuthType> {
@@ -71,8 +69,8 @@ export class AuthResolver {
   @Public()
   @Mutation(() => AuthType)
   public async refreshAccess(
-    @GqlReq() req: Request,
-    @GqlRes() res: Response,
+    @Context('req') req: Request,
+    @Context('res') res: Response,
   ): Promise<AuthType> {
     const token = this.refreshTokenFromReq(req);
     const { refreshToken, ...authType } =
@@ -83,8 +81,8 @@ export class AuthResolver {
 
   @Mutation(() => MessageType)
   public async logout(
-    @GqlReq() req: Request,
-    @GqlRes() res: Response,
+    @Context('req') req: Request,
+    @Context('res') res: Response,
   ): Promise<IMessage> {
     const token = this.refreshTokenFromReq(req);
     res.clearCookie(this.cookieName);
@@ -96,10 +94,11 @@ export class AuthResolver {
   public async confirmEmail(
     @Origin() origin: string | undefined,
     @Args() confirmEmailDto: ConfirmEmailDto,
-    @GqlRes() res: Response,
+    @Context('res') res: Response,
   ) {
     const { refreshToken, ...authType } = await this.authService.confirmEmail(
       confirmEmailDto,
+      origin,
     );
     this.saveRefreshCookie(res, refreshToken);
     return authType;
@@ -127,7 +126,7 @@ export class AuthResolver {
     @CurrentUser() id: number,
     @Origin() origin: string | undefined,
     @Args('input') input: UpdatePasswordInput,
-    @GqlRes() res: Response,
+    @Context('res') res: Response,
   ): Promise<AuthType> {
     const { refreshToken, ...authType } = await this.authService.updatePassword(
       id,

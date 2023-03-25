@@ -25,9 +25,7 @@ export class GraphQLConfig implements GqlOptionsFactory {
       }),
       path: '/api/graphql',
       autoSchemaFile: './schema.gql',
-      debug: this.testing,
       sortSchema: true,
-      bodyParserConfig: false,
       playground: this.testing,
       introspection: true,
     };

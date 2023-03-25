@@ -4,7 +4,7 @@
   Afonso Barracha
 */
 
-export interface IFederatedInstance {
-  readonly __typename: string;
+export interface IFederatedInstance<T extends string> {
+  readonly __typename: T;
   readonly id: number;
 }
