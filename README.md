@@ -4,7 +4,11 @@
 
 This is the source code for the
 tutorial [Nest Authentication with OAuth2.0](https://dev.to/tugascript/nestjs-authentication-with-oauth20-express-local-oauth-rest-api-3hfj).
-This is the 2<sup>nd</sup> part on a 5 part series, where we will build a production level NestJS OAuth2 service.
+This is the 4<sup>th</sup> part on a 5 part series, where we will build a production level NestJS OAuth2 service.
+
+However unlike the other parts this one is not production ready. **OAUTH SYSTEMS SHOULD NOT BE IN GRAPHQL**. This is
+just for educational purposes, please use the Express REST or Fastify REST APIs. There is nothing wrong with having a
+Hybrid API, with REST for Authentication and GraphQL for the rest of the API, that is what is recommended.
 
 ### Contents
 
@@ -48,6 +52,15 @@ $ yarn test:cov
 $ yarn test:e2e
 ```
 
+## About the Author
+
+Hi there, I am Afonso Barracha, an econometrician turned back-end developer with an interest in GraphQL. I try to
+publish high-quality articles once or twice a month. If you liked what you saw, to stay updated, follow me
+on [dev](https://dev.to/tugascript) and [LinkedIn](https://www.linkedin.com/in/afonso-barracha/) to join our growing
+community.
+
+While you at it consider [buying me a coffee](https://www.buymeacoffee.com/barracha), it will help me keep writing.
+
 ## License
 
-The code of this tutorial is licensed under the GNU GPLv3 - see the [LICENSE](LICENSE) file for details.
+The code of this tutorial is licensed under the GNU LGPLv3 - see the [LICENSE](LICENSE) file for details.
