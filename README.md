@@ -3,7 +3,7 @@
 ## Intro
 
 This is the source code for the
-tutorial [Nest Authentication with OAuth2.0](https://dev.to/tugascript/nestjs-authentication-with-oauth20-express-local-oauth-rest-api-3hfj).
+tutorial [Nest Authentication with OAuth2.0](https://dev.to/tugascript/nestjs-authentication-with-oauth20-apollo-local-oauth-graphql-api-5efk).
 This is the 4<sup>th</sup> part on a 5 part series, where we will build a production level NestJS OAuth2 service.
 
 However unlike the other parts this one is not production ready. **OAUTH SYSTEMS SHOULD NOT BE IN GRAPHQL**. This is
