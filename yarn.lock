@@ -1736,10 +1736,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:18.14.3":
-  version: 18.14.3
-  resolution: "@types/node@npm:18.14.3"
-  checksum: 341bd0d7afec96e78e89821a4f922c33feec5fed71396171bb78f7b9fca63ab491c35c390083381ddbaf7f5ec4170dfe527bb950b468824e0a276d04cc519b64
+"@types/node@npm:18.15.11":
+  version: 18.15.11
+  resolution: "@types/node@npm:18.15.11"
+  checksum: 977b4ad04708897ff0eb049ecf82246d210939c82461922d20f7d2dcfd81bbc661582ba3af28869210f7e8b1934529dcd46bff7d448551400f9d48b9d3bddec3
   languageName: node
   linkType: hard
 
@@ -6170,7 +6170,7 @@ __metadata:
     "@types/handlebars": ^4.1.0
     "@types/jest": 29.4.0
     "@types/jsonwebtoken": ^9.0.1
-    "@types/node": 18.14.3
+    "@types/node": 18.15.11
     "@types/nodemailer": ^6.4.7
     "@types/supertest": ^2.0.12
     "@types/uuid": ^9.0.0
