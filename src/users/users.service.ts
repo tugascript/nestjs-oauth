@@ -20,13 +20,17 @@ import { isNull, isUndefined } from '../common/utils/validation.util';
 import { ChangeEmailDto } from './dtos/change-email.dto';
 import { PasswordDto } from './dtos/password.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { OAuthProviderEntity } from './entities/oauth-provider.entity';
 import { UserEntity } from './entities/user.entity';
+import { OAuthProvidersEnum } from './enums/oauth-providers.enum';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly usersRepository: EntityRepository<UserEntity>,
+    @InjectRepository(OAuthProviderEntity)
+    private readonly oauthProvidersRepository: EntityRepository<OAuthProviderEntity>,
     private readonly commonService: CommonService,
   ) {}
 
@@ -228,6 +232,35 @@ export class UsersService {
     return user;
   }
 
+  public async findOrCreate(
+    provider: OAuthProvidersEnum,
+    email: string,
+    name: string,
+  ): Promise<UserEntity> {
+    const formattedEmail = email.toLowerCase();
+    const user = await this.usersRepository.findOne(
+      {
+        email: formattedEmail,
+      },
+      {
+        populate: ['authProviders'],
+      },
+    );
+
+    if (isUndefined(user) || isNull(user)) {
+      return this.create(provider, email, name);
+    }
+    if (
+      !user.authProviders.contains(
+        this.oauthProvidersRepository.getReference([provider, user.id]),
+      )
+    ) {
+      await this.createOAuthProvider(provider, user);
+    }
+
+    return user;
+  }
+
   private async checkUsernameUniqueness(username: string): Promise<void> {
     const count = await this.usersRepository.count({ username });
 
@@ -271,5 +304,21 @@ export class UsersService {
     }
 
     return pointSlug;
+  }
+
+  private async createOAuthProvider(
+    provider: OAuthProvidersEnum,
+    user: UserEntity,
+  ): Promise<OAuthProviderEntity> {
+    const oauthProvider = this.oauthProvidersRepository.create({
+      provider,
+      user,
+    });
+    await this.commonService.saveEntity(
+      this.oauthProvidersRepository,
+      oauthProvider,
+      true,
+    );
+    return oauthProvider;
   }
 }

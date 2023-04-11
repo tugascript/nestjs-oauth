@@ -4,9 +4,9 @@
   Afonso Barracha
 */
 
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   BadRequestException,
-  CACHE_MANAGER,
   Inject,
   Injectable,
   UnauthorizedException,
@@ -69,10 +69,8 @@ export class AuthService {
       TokenTypeEnum.CONFIRMATION,
     );
     const user = await this.usersService.confirmEmail(id, version);
-    const [accessToken, refreshToken] = await this.generateAuthTokens(
-      user,
-      domain,
-    );
+    const [accessToken, refreshToken] =
+      await this.jwtService.generateAuthTokens(user, domain);
     return { user, accessToken, refreshToken };
   }
 
@@ -95,10 +93,8 @@ export class AuthService {
       );
     }
 
-    const [accessToken, refreshToken] = await this.generateAuthTokens(
-      user,
-      domain,
-    );
+    const [accessToken, refreshToken] =
+      await this.jwtService.generateAuthTokens(user, domain);
     return { user, accessToken, refreshToken };
   }
 
@@ -113,11 +109,8 @@ export class AuthService {
       );
     await this.checkIfTokenIsBlacklisted(id, tokenId);
     const user = await this.usersService.findOneByCredentials(id, version);
-    const [accessToken, newRefreshToken] = await this.generateAuthTokens(
-      user,
-      domain,
-      tokenId,
-    );
+    const [accessToken, newRefreshToken] =
+      await this.jwtService.generateAuthTokens(user, domain, tokenId);
     return { user, accessToken, refreshToken: newRefreshToken };
   }
 
@@ -172,10 +165,8 @@ export class AuthService {
       password,
       password1,
     );
-    const [accessToken, refreshToken] = await this.generateAuthTokens(
-      user,
-      domain,
-    );
+    const [accessToken, refreshToken] =
+      await this.jwtService.generateAuthTokens(user, domain);
     return { user, accessToken, refreshToken };
   }
 
@@ -273,26 +264,5 @@ export class AuthService {
     }
 
     return this.usersService.findOneByUsername(emailOrUsername, true);
-  }
-
-  private async generateAuthTokens(
-    user: UserEntity,
-    domain?: string,
-    tokenId?: string,
-  ): Promise<[string, string]> {
-    return Promise.all([
-      this.jwtService.generateToken(
-        user,
-        TokenTypeEnum.ACCESS,
-        domain,
-        tokenId,
-      ),
-      this.jwtService.generateToken(
-        user,
-        TokenTypeEnum.REFRESH,
-        domain,
-        tokenId,
-      ),
-    ]);
   }
 }

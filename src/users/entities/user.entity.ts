@@ -4,7 +4,14 @@
   Afonso Barracha
 */
 
-import { Embedded, Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+  Collection,
+  Embedded,
+  Entity,
+  OneToMany,
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core';
 import { IsBoolean, IsEmail, IsString, Length, Matches } from 'class-validator';
 import {
   BCRYPT_HASH,
@@ -13,6 +20,7 @@ import {
 } from '../../common/consts/regex.const';
 import { CredentialsEmbeddable } from '../embeddables/credentials.embeddable';
 import { IUser } from '../interfaces/user.interface';
+import { OAuthProviderEntity } from './oauth-provider.entity';
 
 @Entity({ tableName: 'users' })
 export class UserEntity implements IUser {
@@ -59,4 +67,7 @@ export class UserEntity implements IUser {
 
   @Property({ onUpdate: () => new Date() })
   public updatedAt: Date = new Date();
+
+  @OneToMany(() => OAuthProviderEntity, (oauth) => oauth.user)
+  public authProviders = new Collection<OAuthProviderEntity, UserEntity>(this);
 }
