@@ -1070,13 +1070,13 @@ __metadata:
   linkType: hard
 
 "@mikro-orm/nestjs@npm:^5.1.6":
-  version: 5.1.6
-  resolution: "@mikro-orm/nestjs@npm:5.1.6"
+  version: 5.1.8
+  resolution: "@mikro-orm/nestjs@npm:5.1.8"
   peerDependencies:
     "@mikro-orm/core": ^5.0.0 || ^6.0.0-dev.0
     "@nestjs/common": ^8.0.0 || ^9.0.0
     "@nestjs/core": ^8.0.0 || ^9.0.0
-  checksum: 77a7f8727727fb1fcd3c7c3de6ea608affa7feae80a121c84c3f72f3447d9463d86aff7a89e37a5965bb521e445b7fb25de10e83abd268fd957bc28a894aa1a6
+  checksum: 183772d17db48425412613441b363a362debcc1e2a00f2e3b12b530ecaf1882a8221a2ad71be9e1484711e61671088ee89a07506bea9916f3728455e6a9c50e3
   languageName: node
   linkType: hard
 
