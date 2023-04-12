@@ -170,22 +170,27 @@ export class UsersService {
 
   public async updatePassword(
     userId: number,
-    password: string,
     newPassword: string,
+    password?: string,
   ): Promise<UserEntity> {
     const user = await this.findOneById(userId);
 
-    if (!(await compare(password, user.password))) {
-      throw new BadRequestException('Wrong password');
+    if (user.password !== 'UNSET') {
+      if (isUndefined(password) || isNull(password)) {
+        throw new BadRequestException('Password is required');
+      }
+      if (!(await compare(password, user.password))) {
+        throw new UnauthorizedException('Wrong password');
+      }
     }
     if (await compare(newPassword, user.password)) {
       throw new BadRequestException('New password must be different');
     }
+    if (user.password === 'UNSET') {
+      await this.createOAuthProvider(OAuthProvidersEnum.LOCAL, user.id);
+    }
 
-    user.credentials.updatePassword(user.password);
-    user.password = await hash(newPassword, 10);
-    await this.commonService.saveEntity(this.usersRepository, user);
-    return user;
+    return await this.changePassword(user, newPassword);
   }
 
   public async resetPassword(
@@ -194,10 +199,7 @@ export class UsersService {
     password: string,
   ): Promise<UserEntity> {
     const user = await this.findOneByCredentials(userId, version);
-    user.credentials.updatePassword(user.password);
-    user.password = await hash(password, 10);
-    await this.commonService.saveEntity(this.usersRepository, user);
-    return user;
+    return await this.changePassword(user, password);
   }
 
   public async updateEmail(
@@ -257,9 +259,22 @@ export class UsersService {
         this.oauthProvidersRepository.getReference([provider, user.id]),
       )
     ) {
-      await this.createOAuthProvider(provider, user);
+      await this.createOAuthProvider(provider, user.id);
     }
 
+    return user;
+  }
+
+  private async changePassword(
+    user: UserEntity,
+    password: string,
+  ): Promise<UserEntity> {
+    if (user.password !== 'UNSET') {
+      user.credentials.updatePassword(user.password);
+    }
+
+    user.password = await hash(password, 10);
+    await this.commonService.saveEntity(this.usersRepository, user);
     return user;
   }
 
@@ -310,11 +325,11 @@ export class UsersService {
 
   private async createOAuthProvider(
     provider: OAuthProvidersEnum,
-    user: UserEntity,
+    userId: number,
   ): Promise<OAuthProviderEntity> {
     const oauthProvider = this.oauthProvidersRepository.create({
       provider,
-      user,
+      user: userId,
     });
     await this.commonService.saveEntity(
       this.oauthProvidersRepository,

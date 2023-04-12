@@ -168,8 +168,8 @@ export class AuthService {
     this.comparePasswords(password1, password2);
     const user = await this.usersService.updatePassword(
       userId,
-      password,
       password1,
+      password,
     );
     const [accessToken, refreshToken] =
       await this.jwtService.generateAuthTokens(user, domain);
