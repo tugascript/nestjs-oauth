@@ -1,6 +1,12 @@
+/*
+  Free and Open Source - GNU LGPLv3
+  Copyright © 2023
+  Afonso Barracha
+*/
+
 import { Test, TestingModule } from '@nestjs/testing';
-import { Oauth2Controller } from './oauth2.controller';
-import { Oauth2Service } from './oauth2.service';
+import { Oauth2Controller } from '../oauth2.controller';
+import { Oauth2Service } from '../oauth2.service';
 
 describe('Oauth2Controller', () => {
   let controller: Oauth2Controller;

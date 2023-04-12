@@ -9,6 +9,7 @@ import { defineConfig as definePGConfig } from '@mikro-orm/postgresql';
 import { defineConfig as defineSqliteConfig } from '@mikro-orm/sqlite';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { isUndefined } from '../common/utils/validation.util';
 import { IConfig } from './interfaces/config.interface';
 import { redisUrlParser } from './utils/redis-url-parser.util';
 
@@ -31,6 +32,7 @@ export function config(): IConfig {
 
   return {
     id: process.env.APP_ID,
+    url: process.env.URL,
     port: parseInt(process.env.PORT, 10),
     domain: process.env.DOMAIN,
     jwt: {
@@ -76,5 +78,39 @@ export function config(): IConfig {
       limit: parseInt(process.env.THROTTLE_LIMIT, 10),
     },
     testing,
+    oauth2: {
+      microsoft:
+        isUndefined(process.env.MICROSOFT_CLIENT_ID) ||
+        isUndefined(process.env.MICROSOFT_CLIENT_SECRET)
+          ? null
+          : {
+              id: process.env.MICROSOFT_CLIENT_ID,
+              secret: process.env.MICROSOFT_CLIENT_SECRET,
+            },
+      google:
+        isUndefined(process.env.GOOGLE_CLIENT_ID) ||
+        isUndefined(process.env.GOOGLE_CLIENT_SECRET)
+          ? null
+          : {
+              id: process.env.GOOGLE_CLIENT_ID,
+              secret: process.env.GOOGLE_CLIENT_SECRET,
+            },
+      facebook:
+        isUndefined(process.env.FACEBOOK_CLIENT_ID) ||
+        isUndefined(process.env.FACEBOOK_CLIENT_SECRET)
+          ? null
+          : {
+              id: process.env.FACEBOOK_CLIENT_ID,
+              secret: process.env.FACEBOOK_CLIENT_SECRET,
+            },
+      github:
+        isUndefined(process.env.GITHUB_CLIENT_ID) ||
+        isUndefined(process.env.GITHUB_CLIENT_SECRET)
+          ? null
+          : {
+              id: process.env.GITHUB_CLIENT_ID,
+              secret: process.env.GITHUB_CLIENT_SECRET,
+            },
+    },
   };
 }

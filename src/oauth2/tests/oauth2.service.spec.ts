@@ -1,8 +1,15 @@
+/*
+  Free and Open Source - GNU LGPLv3
+  Copyright © 2023
+  Afonso Barracha
+*/
+
 import { Test, TestingModule } from '@nestjs/testing';
-import { Oauth2Service } from './oauth2.service';
+import { Oauth2Service } from '../oauth2.service';
 
 describe('Oauth2Service', () => {
-  let service: Oauth2Service;
+  let module: TestingModule,
+    service: Oauth2Service,
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

@@ -35,9 +35,10 @@ export class UsersService {
   ) {}
 
   public async create(
+    provider: OAuthProvidersEnum,
     email: string,
     name: string,
-    password: string,
+    password?: string,
   ): Promise<UserEntity> {
     const formattedEmail = email.toLowerCase();
     await this.checkEmailUniqueness(formattedEmail);
@@ -46,7 +47,8 @@ export class UsersService {
       email: formattedEmail,
       name: formattedName,
       username: await this.generateUsername(formattedName),
-      password: await hash(password, 10),
+      password: isUndefined(password) ? 'UNSET' : await hash(password, 10),
+      confirmed: provider !== OAuthProvidersEnum.LOCAL,
     });
     await this.commonService.saveEntity(this.usersRepository, user, true);
     return user;

@@ -14,7 +14,7 @@ import {
 } from '@mikro-orm/core';
 import { IsBoolean, IsEmail, IsString, Length, Matches } from 'class-validator';
 import {
-  BCRYPT_HASH,
+  BCRYPT_HASH_OR_UNSET,
   NAME_REGEX,
   SLUG_REGEX,
 } from '../../common/consts/regex.const';
@@ -51,8 +51,8 @@ export class UserEntity implements IUser {
 
   @Property({ columnType: 'varchar', length: 60 })
   @IsString()
-  @Length(59, 60)
-  @Matches(BCRYPT_HASH)
+  @Length(5, 60)
+  @Matches(BCRYPT_HASH_OR_UNSET)
   public password: string;
 
   @Property({ columnType: 'boolean', default: false })
