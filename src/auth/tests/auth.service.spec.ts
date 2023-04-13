@@ -7,7 +7,7 @@
 import { faker } from '@faker-js/faker';
 import { MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { CACHE_MANAGER, CacheModule } from '@nestjs/common';
+import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ThrottlerModule } from '@nestjs/throttler';

@@ -26,9 +26,9 @@ export class OAuthClass {
   };
   private static readonly [OAuthProvidersEnum.FACEBOOK]: IAuth = {
     authorizeHost: 'https://facebook.com',
-    authorizePath: '/v6.0/dialog/oauth',
+    authorizePath: '/v9.0/dialog/oauth',
     tokenHost: 'https://graph.facebook.com',
-    tokenPath: '/v6.0/oauth/access_token',
+    tokenPath: '/v9.0/oauth/access_token',
   };
   private static readonly [OAuthProvidersEnum.GITHUB]: IAuth = {
     authorizeHost: 'https://github.com',

@@ -9,6 +9,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { AuthGuard } from './auth/guards/auth.guard';
@@ -17,6 +18,7 @@ import { config } from './config';
 import { CacheConfig } from './config/cache.config';
 import { validationSchema } from './config/config.schema';
 import { MikroOrmConfig } from './config/mikroorm.config';
+import { ThrottlerConfig } from './config/throttler.config';
 import { JwtModule } from './jwt/jwt.module';
 import { MailerModule } from './mailer/mailer.module';
 import { Oauth2Module } from './oauth2/oauth2.module';
@@ -37,6 +39,10 @@ import { UsersModule } from './users/users.module';
       isGlobal: true,
       imports: [ConfigModule],
       useClass: CacheConfig,
+    }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      useClass: ThrottlerConfig,
     }),
     CommonModule,
     UsersModule,

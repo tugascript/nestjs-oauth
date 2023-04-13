@@ -4,6 +4,7 @@
   Afonso Barracha
 */
 
+import { QueryOrder } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import {
@@ -20,6 +21,7 @@ import { isNull, isUndefined } from '../common/utils/validation.util';
 import { ChangeEmailDto } from './dtos/change-email.dto';
 import { PasswordDto } from './dtos/password.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { CredentialsEmbeddable } from './embeddables/credentials.embeddable';
 import { OAuthProviderEntity } from './entities/oauth-provider.entity';
 import { UserEntity } from './entities/user.entity';
 import { OAuthProvidersEnum } from './enums/oauth-providers.enum';
@@ -40,6 +42,7 @@ export class UsersService {
     name: string,
     password?: string,
   ): Promise<UserEntity> {
+    const isConfirmed = provider !== OAuthProvidersEnum.LOCAL;
     const formattedEmail = email.toLowerCase();
     await this.checkEmailUniqueness(formattedEmail);
     const formattedName = this.commonService.formatName(name);
@@ -48,9 +51,11 @@ export class UsersService {
       name: formattedName,
       username: await this.generateUsername(formattedName),
       password: isUndefined(password) ? 'UNSET' : await hash(password, 10),
-      confirmed: provider !== OAuthProvidersEnum.LOCAL,
+      confirmed: isConfirmed,
+      credentials: new CredentialsEmbeddable(isConfirmed),
     });
     await this.commonService.saveEntity(this.usersRepository, user, true);
+    await this.createOAuthProvider(provider, user.id);
     return user;
   }
 
@@ -180,7 +185,7 @@ export class UsersService {
         throw new BadRequestException('Password is required');
       }
       if (!(await compare(password, user.password))) {
-        throw new UnauthorizedException('Wrong password');
+        throw new BadRequestException('Wrong password');
       }
     }
     if (await compare(newPassword, user.password)) {
@@ -255,8 +260,8 @@ export class UsersService {
       return this.create(provider, email, name);
     }
     if (
-      !user.authProviders.contains(
-        this.oauthProvidersRepository.getReference([provider, user.id]),
+      isUndefined(
+        user.authProviders.getItems().find((p) => p.provider === provider),
       )
     ) {
       await this.createOAuthProvider(provider, user.id);
@@ -265,11 +270,24 @@ export class UsersService {
     return user;
   }
 
+  public async findOAuthProviders(
+    userId: number,
+  ): Promise<OAuthProviderEntity[]> {
+    return await this.oauthProvidersRepository.find(
+      {
+        user: userId,
+      },
+      { orderBy: { provider: QueryOrder.ASC } },
+    );
+  }
+
   private async changePassword(
     user: UserEntity,
     password: string,
   ): Promise<UserEntity> {
-    if (user.password !== 'UNSET') {
+    if (user.password === 'UNSET') {
+      user.credentials.updateVersion();
+    } else {
       user.credentials.updatePassword(user.password);
     }
 

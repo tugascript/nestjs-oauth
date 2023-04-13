@@ -132,6 +132,6 @@ export class Oauth2Service {
       throw new NotFoundException('Page not found');
     }
 
-    return this.commonService.throwInternalError(oauth.getToken(code));
+    return await this.commonService.throwInternalError(oauth.getToken(code));
   }
 }

@@ -43,8 +43,10 @@ import { SignInDto } from './dtos/sign-in.dto';
 import { SignUpDto } from './dtos/sign-up.dto';
 import { FastifyThrottlerGuard } from './guards/fastify-throttler.guard';
 import { IAuthResponseUser } from './interfaces/auth-response-user.interface';
+import { IOAuthProvidersResponse } from './interfaces/oauth-provider-response.interface';
 import { AuthResponseUserMapper } from './mappers/auth-response-user.mapper';
 import { AuthResponseMapper } from './mappers/auth-response.mapper';
+import { OAuthProvidersResponseMapper } from './mappers/oauth-provider-response.mapper';
 
 @ApiTags('Auth')
 @Controller('api/auth')
@@ -249,6 +251,21 @@ export class AuthController {
   public async getMe(@CurrentUser() id: number): Promise<IAuthResponseUser> {
     const user = await this.usersService.findOneById(id);
     return AuthResponseUserMapper.map(user);
+  }
+
+  @Get('/providers')
+  @ApiOkResponse({
+    type: OAuthProvidersResponseMapper,
+    description: 'The OAuth providers are returned.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'The user is not logged in.',
+  })
+  public async getOAuthProviders(
+    @CurrentUser() id: number,
+  ): Promise<IOAuthProvidersResponse> {
+    const providers = await this.usersService.findOAuthProviders(id);
+    return OAuthProvidersResponseMapper.map(providers);
   }
 
   private refreshTokenFromReq(req: FastifyRequest): string {

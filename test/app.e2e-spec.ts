@@ -19,6 +19,7 @@ import { CommonService } from '../src/common/common.service';
 import { TokenTypeEnum } from '../src/jwt/enums/token-type.enum';
 import { JwtService } from '../src/jwt/jwt.service';
 import { MailerService } from '../src/mailer/mailer.service';
+import { OAuthProvidersEnum } from '../src/users/enums/oauth-providers.enum';
 import { IUser } from '../src/users/interfaces/user.interface';
 import { UsersService } from '../src/users/users.service';
 
@@ -271,7 +272,12 @@ describe('AppController (e2e)', () => {
 
       it('should throw 401 error if user is not confirmed', async () => {
         const newName = faker.name.firstName();
-        await usersService.create(newEmail, newName, password);
+        await usersService.create(
+          OAuthProvidersEnum.LOCAL,
+          newEmail,
+          newName,
+          password,
+        );
 
         await request(app.getHttpServer())
           .post(signInUrl)
