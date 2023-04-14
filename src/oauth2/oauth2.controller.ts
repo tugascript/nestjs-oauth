@@ -42,7 +42,7 @@ export class Oauth2Controller {
     private readonly oauth2Service: Oauth2Service,
     private readonly configService: ConfigService,
   ) {
-    this.url = `https://${this.configService.get<string>('DOMAIN')}`;
+    this.url = `https://${this.configService.get<string>('domain')}`;
     this.cookieName = this.configService.get<string>('REFRESH_COOKIE');
     this.refreshTime = this.configService.get<number>('jwt.refresh.time');
     this.testing = this.configService.get<boolean>('testing');
