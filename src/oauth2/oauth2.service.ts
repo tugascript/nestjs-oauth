@@ -129,7 +129,7 @@ export class Oauth2Service {
     const oauth = this.getOAuth(provider);
 
     if (state !== oauth.state) {
-      throw new NotFoundException('Page not found');
+      throw new UnauthorizedException('Corrupted state');
     }
 
     return await this.commonService.throwInternalError(oauth.getToken(code));
