@@ -3,7 +3,7 @@
 ## Intro
 
 This is the source code for the
-tutorial [Nest Authentication with OAuth2.0](https://dev.to/tugascript/nestjs-authentication-with-oauth20-fastify-local-oauth-5gn9).
+tutorial [Nest Authentication with OAuth2.0](https://dev.to/tugascript/nestjs-authentication-with-oauth20-adding-external-providers-2kj).
 This is the 5<sup>th</sup> and last part on a 5 part series, where we will build a production level NestJS OAuth2
 service.
 
