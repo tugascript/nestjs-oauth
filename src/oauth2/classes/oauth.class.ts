@@ -36,6 +36,15 @@ export class OAuthClass {
     tokenHost: 'https://github.com',
     tokenPath: '/login/oauth/access_token',
   };
+  private static userDataUrls: Record<OAuthProvidersEnum, string> = {
+    [OAuthProvidersEnum.GOOGLE]:
+      'https://www.googleapis.com/oauth2/v3/userinfo',
+    [OAuthProvidersEnum.MICROSOFT]: 'https://graph.microsoft.com/v1.0/me',
+    [OAuthProvidersEnum.FACEBOOK]:
+      'https://graph.facebook.com/v16.0/me?fields=email,name',
+    [OAuthProvidersEnum.GITHUB]: 'https://api.github.com/user',
+    [OAuthProvidersEnum.LOCAL]: '',
+  };
 
   private readonly code: AuthorizationCode;
   private readonly authorization: IAuthParams;
@@ -55,7 +64,7 @@ export class OAuthClass {
       auth: OAuthClass[provider],
     });
     this.authorization = OAuthClass.genAuthorization(provider, url);
-    this.userDataUrl = OAuthClass.getUserDataUrl(provider);
+    this.userDataUrl = OAuthClass.userDataUrls[provider];
   }
 
   public get state(): string {
@@ -105,19 +114,6 @@ export class OAuthClass {
           redirect_uri,
           scope: ['user:email', 'read:user'],
         };
-    }
-  }
-
-  private static getUserDataUrl(provider: OAuthProvidersEnum): string {
-    switch (provider) {
-      case OAuthProvidersEnum.GOOGLE:
-        return 'https://www.googleapis.com/oauth2/v3/userinfo';
-      case OAuthProvidersEnum.MICROSOFT:
-        return 'https://graph.microsoft.com/v1.0/me';
-      case OAuthProvidersEnum.FACEBOOK:
-        return 'https://graph.facebook.com/v16.0/me?fields=email,name';
-      case OAuthProvidersEnum.GITHUB:
-        return 'https://api.github.com/user';
     }
   }
 
