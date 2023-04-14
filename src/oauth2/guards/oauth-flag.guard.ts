@@ -25,7 +25,7 @@ export const OAuthFlagGuard = (
 
     public canActivate(context: ExecutionContext): boolean {
       const client = this.configService.get<IClient | null>(
-        `oauth2.${provider.toLowerCase()}`,
+        `oauth2.${provider}`,
       );
 
       if (isNull(client)) {
