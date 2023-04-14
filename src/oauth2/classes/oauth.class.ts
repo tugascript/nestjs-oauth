@@ -74,7 +74,7 @@ export class OAuthClass {
     provider: OAuthProvidersEnum,
     url: string,
   ): IAuthParams {
-    const redirect_uri = `${url}/${provider}/callback`;
+    const redirect_uri = `${url}/api/auth/ext/${provider}/callback`;
     const state = randomBytes(16).toString('hex');
 
     switch (provider) {
