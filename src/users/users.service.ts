@@ -285,12 +285,7 @@ export class UsersService {
     user: UserEntity,
     password: string,
   ): Promise<UserEntity> {
-    if (user.password === 'UNSET') {
-      user.credentials.updateVersion();
-    } else {
-      user.credentials.updatePassword(user.password);
-    }
-
+    user.credentials.updatePassword(user.password);
     user.password = await hash(password, 10);
     await this.commonService.saveEntity(this.usersRepository, user);
     return user;
