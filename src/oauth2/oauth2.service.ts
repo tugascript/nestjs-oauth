@@ -36,7 +36,7 @@ export class Oauth2Service {
     private readonly httpService: HttpService,
     private readonly commonService: CommonService,
   ) {
-    const url = configService.get<string>('URL');
+    const url = configService.get<string>('url');
     this[OAuthProvidersEnum.MICROSOFT] = Oauth2Service.setOAuthClass(
       OAuthProvidersEnum.MICROSOFT,
       configService,
