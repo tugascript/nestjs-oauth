@@ -9,15 +9,18 @@ import { ThrottlerModuleOptions } from '@nestjs/throttler';
 import { RedisOptions } from 'ioredis';
 import { IEmailConfig } from './email-config.interface';
 import { IJwt } from './jwt.interface';
+import { IOAuth2 } from './oauth2.interface';
 
 export interface IConfig {
-  id: string;
-  port: number;
-  domain: string;
-  db: MikroOrmModuleOptions;
-  redis: RedisOptions;
-  jwt: IJwt;
-  emailService: IEmailConfig;
-  throttler: ThrottlerModuleOptions;
-  testing: boolean;
+  readonly id: string;
+  readonly url: string;
+  readonly port: number;
+  readonly domain: string;
+  readonly db: MikroOrmModuleOptions;
+  readonly redis: RedisOptions;
+  readonly jwt: IJwt;
+  readonly emailService: IEmailConfig;
+  readonly throttler: ThrottlerModuleOptions;
+  readonly testing: boolean;
+  readonly oauth2: IOAuth2;
 }

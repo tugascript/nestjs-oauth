@@ -4,22 +4,27 @@
   Afonso Barracha
 */
 
-import { Request } from 'express-serve-static-core';
+import { FastifyRequest } from 'fastify';
 
 class RequestMock {
-  public signedCookies: Record<string, string> = {};
+  public cookies: Record<string, string> = {};
   public headers: Record<string, Record<string, string>> = {};
 
   public setCookie(name: string, value: string): void {
-    this.signedCookies[name] = value;
+    this.cookies[name] = value;
   }
 
   public removeCookie(name: string): void {
-    delete this.signedCookies[name];
+    delete this.cookies[name];
+  }
+
+  public unsignCookie(cookie: string): { value: string; valid: boolean } {
+    const value = Object.values(this.cookies).find((c) => c === cookie);
+    return { value, valid: true };
   }
 }
 
-interface ExtendedRequestMock extends Request {
+interface ExtendedRequestMock extends FastifyRequest {
   setCookie: (name: string, value: string) => void;
   removeCookie: (name: string) => void;
 }

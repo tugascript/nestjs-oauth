@@ -7,7 +7,7 @@
 import { faker } from '@faker-js/faker';
 import { MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { CacheModule } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -24,6 +24,7 @@ import { JwtModule } from '../../jwt/jwt.module';
 import { JwtService } from '../../jwt/jwt.service';
 import { MailerModule } from '../../mailer/mailer.module';
 import { MailerService } from '../../mailer/mailer.service';
+import { OAuthProvidersEnum } from '../../users/enums/oauth-providers.enum';
 import { IUser } from '../../users/interfaces/user.interface';
 import { UsersModule } from '../../users/users.module';
 import { AuthController } from '../auth.controller';
@@ -161,7 +162,7 @@ describe('AuthController', () => {
       );
       await controller.confirmEmail(origin, { confirmationToken: token }, res);
       expect(res.cookie).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalled();
+      expect(res.send).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       mockUser.credentials.version = 1;
     });
@@ -203,7 +204,7 @@ describe('AuthController', () => {
         password,
       });
       expect(res.cookie).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalled();
+      expect(res.send).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
     });
 
@@ -251,7 +252,7 @@ describe('AuthController', () => {
       req.setCookie(cookieName, token);
       await controller.refreshAccess(req, res);
       expect(res.cookie).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalled();
+      expect(res.send).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
     });
   });
@@ -282,7 +283,7 @@ describe('AuthController', () => {
       await controller.logout(req, res);
       expect(res.clearCookie).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalled();
+      expect(res.send).toHaveBeenCalled();
     });
   });
 
@@ -437,7 +438,7 @@ describe('AuthController', () => {
       );
       expect(res.cookie).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalled();
+      expect(res.send).toHaveBeenCalled();
     });
   });
 
@@ -445,6 +446,14 @@ describe('AuthController', () => {
     it('should get a user', async () => {
       const user = await controller.getMe(mockUser.id);
       expect(user).toBeInstanceOf(AuthResponseUserMapper);
+    });
+  });
+
+  describe('providers', () => {
+    it('should get providers', async () => {
+      const providers = await controller.getOAuthProviders(mockUser.id);
+      expect(providers.data).toHaveLength(1);
+      expect(providers.data[0].provider).toBe(OAuthProvidersEnum.LOCAL);
     });
   });
 

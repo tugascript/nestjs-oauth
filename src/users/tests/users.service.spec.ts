@@ -7,7 +7,7 @@
 import { faker } from '@faker-js/faker';
 import { MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { CacheModule } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { compare } from 'bcrypt';
@@ -16,7 +16,9 @@ import { CommonService } from '../../common/common.service';
 import { config } from '../../config';
 import { validationSchema } from '../../config/config.schema';
 import { MikroOrmConfig } from '../../config/mikroorm.config';
+import { OAuthProviderEntity } from '../entities/oauth-provider.entity';
 import { UserEntity } from '../entities/user.entity';
+import { OAuthProvidersEnum } from '../enums/oauth-providers.enum';
 import { UsersService } from '../users.service';
 
 describe('UsersService', () => {
@@ -41,7 +43,7 @@ describe('UsersService', () => {
           imports: [ConfigModule],
           useClass: MikroOrmConfig,
         }),
-        MikroOrmModule.forFeature([UserEntity]),
+        MikroOrmModule.forFeature([UserEntity, OAuthProviderEntity]),
         CommonModule,
       ],
       providers: [UsersService, CommonModule],
@@ -57,6 +59,8 @@ describe('UsersService', () => {
   const email2 = faker.internet.email();
   const name = faker.name.firstName();
   const password = faker.internet.password(8);
+  const email3 = faker.internet.email();
+  const name2 = faker.name.fullName();
 
   it('should be defined', () => {
     expect(module).toBeDefined();
@@ -67,14 +71,25 @@ describe('UsersService', () => {
 
   describe('create', () => {
     it('should create a user', async () => {
-      const user = await service.create(email, name, password);
+      const user = await service.create(
+        OAuthProvidersEnum.LOCAL,
+        email,
+        name,
+        password,
+      );
       expect(user).toBeInstanceOf(UserEntity);
       expect(user.username).toEqual(commonService.generatePointSlug(name));
+      expect(user.confirmed).toBeFalsy();
+
+      const providers = await service.findOAuthProviders(user.id);
+      expect(providers).toHaveLength(1);
+      expect(providers[0].provider).toEqual(OAuthProvidersEnum.LOCAL);
     });
 
     it('should throw a conflict exception', async () => {
       await expect(
         service.create(
+          OAuthProvidersEnum.LOCAL,
           email,
           faker.name.firstName(),
           faker.internet.password(8),
@@ -84,6 +99,7 @@ describe('UsersService', () => {
 
     it('should create a user with a different username', async () => {
       const user = await service.create(
+        OAuthProvidersEnum.LOCAL,
         email2,
         name,
         faker.internet.password(8),
@@ -92,6 +108,21 @@ describe('UsersService', () => {
       expect(user.username).toEqual(
         commonService.generatePointSlug(name) + '1',
       );
+    });
+
+    it('should create a user without password if provider is not local', async () => {
+      const user = await service.create(
+        OAuthProvidersEnum.FACEBOOK,
+        email3,
+        name2,
+      );
+      expect(user).toBeInstanceOf(UserEntity);
+      expect(user.username).toEqual(commonService.generatePointSlug(name2));
+      expect(user.confirmed).toBeTruthy();
+
+      const providers = await service.findOAuthProviders(user.id);
+      expect(providers).toHaveLength(1);
+      expect(providers[0].provider).toEqual(OAuthProvidersEnum.FACEBOOK);
     });
   });
 
@@ -103,7 +134,7 @@ describe('UsersService', () => {
       });
 
       it('should throw a not found exception', async () => {
-        await expect(service.findOneById(3)).rejects.toThrowError(
+        await expect(service.findOneById(4)).rejects.toThrowError(
           'User not found',
         );
       });
@@ -210,7 +241,7 @@ describe('UsersService', () => {
       const newPassword = faker.internet.password(8);
 
       it('should update a user password', async () => {
-        const user = await service.updatePassword(1, password, newPassword);
+        const user = await service.updatePassword(1, newPassword, password);
         expect(user).toBeInstanceOf(UserEntity);
         expect(await compare(newPassword, user.password)).toBe(true);
         expect(user.credentials.version).toStrictEqual(1);
@@ -244,11 +275,22 @@ describe('UsersService', () => {
           service.resetPassword(1, 0, faker.internet.password(8)),
         ).rejects.toThrowError('Invalid credentials');
       });
+
+      it('should add a local provider if you have an external provider', async () => {
+        const user = await service.updatePassword(3, password);
+        expect(user).toBeInstanceOf(UserEntity);
+        expect(await compare(password, user.password)).toBe(true);
+        expect(user.credentials.version).toStrictEqual(2);
+
+        const providers = await service.findOAuthProviders(3);
+        expect(providers).toHaveLength(2);
+        expect(providers[1].provider).toEqual(OAuthProvidersEnum.LOCAL);
+      });
     });
   });
 
   describe('delete', () => {
-    it('should thow an error if password is wrong', async () => {
+    it('should throw an error if password is wrong', async () => {
       await expect(
         service.delete(1, { password: password + '1' }),
       ).rejects.toThrowError('Wrong password');

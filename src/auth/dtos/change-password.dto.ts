@@ -5,7 +5,7 @@
 */
 
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, MinLength } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { PasswordsDto } from './passwords.dto';
 
 export abstract class ChangePasswordDto extends PasswordsDto {
@@ -15,6 +15,6 @@ export abstract class ChangePasswordDto extends PasswordsDto {
     type: String,
   })
   @IsString()
-  @MinLength(1)
-  public password!: string;
+  @IsOptional()
+  public password?: string;
 }

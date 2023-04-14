@@ -23,7 +23,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Response } from 'express';
+import { FastifyReply } from 'fastify';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import { IAuthResponseUser } from '../auth/interfaces/auth-response-user.interface';
@@ -119,7 +119,7 @@ export class UsersController {
   public async deleteUser(
     @CurrentUser() id: number,
     @Body() dto: PasswordDto,
-    @Res() res: Response,
+    @Res() res: FastifyReply,
   ): Promise<void> {
     await this.usersService.delete(id, dto);
     res

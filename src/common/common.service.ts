@@ -4,7 +4,8 @@
   Afonso Barracha
 */
 
-import { Dictionary, EntityRepository } from '@mikro-orm/core';
+import { Dictionary } from '@mikro-orm/core';
+import { EntityRepository } from '@mikro-orm/postgresql';
 import {
   BadRequestException,
   ConflictException,

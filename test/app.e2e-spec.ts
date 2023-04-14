@@ -5,21 +5,26 @@
 */
 
 import { faker } from '@faker-js/faker';
-import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
+import fastifyCookie from '@fastify/cookie';
+import { HttpStatus, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
 import { Test, TestingModule } from '@nestjs/testing';
-import cookieParser from 'cookie-parser';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { CommonService } from '../src/common/common.service';
 import { TokenTypeEnum } from '../src/jwt/enums/token-type.enum';
 import { JwtService } from '../src/jwt/jwt.service';
 import { MailerService } from '../src/mailer/mailer.service';
+import { OAuthProvidersEnum } from '../src/users/enums/oauth-providers.enum';
 import { IUser } from '../src/users/interfaces/user.interface';
 import { UsersService } from '../src/users/users.service';
 
 describe('AppController (e2e)', () => {
-  let app: INestApplication,
+  let app: NestFastifyApplication,
     mailerService: MailerService,
     jwtService: JwtService,
     usersService: UsersService,
@@ -30,7 +35,9 @@ describe('AppController (e2e)', () => {
       imports: [AppModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
+    app = moduleFixture.createNestApplication<NestFastifyApplication>(
+      new FastifyAdapter(),
+    );
 
     mailerService = app.get(MailerService);
     jest.spyOn(mailerService, 'sendEmail').mockImplementation();
@@ -41,7 +48,9 @@ describe('AppController (e2e)', () => {
     commonService = app.get(CommonService);
 
     const configService = app.get(ConfigService);
-    app.use(cookieParser(configService.get<string>('COOKIE_SECRET')));
+    await app.register(fastifyCookie, {
+      secret: configService.get<string>('COOKIE_SECRET'),
+    });
     app.useGlobalPipes(
       new ValidationPipe({
         transform: true,
@@ -49,6 +58,7 @@ describe('AppController (e2e)', () => {
     );
 
     await app.init();
+    await app.getHttpAdapter().getInstance().ready();
   });
 
   const name = faker.name.firstName();
@@ -262,7 +272,12 @@ describe('AppController (e2e)', () => {
 
       it('should throw 401 error if user is not confirmed', async () => {
         const newName = faker.name.firstName();
-        await usersService.create(newEmail, newName, password);
+        await usersService.create(
+          OAuthProvidersEnum.LOCAL,
+          newEmail,
+          newName,
+          password,
+        );
 
         await request(app.getHttpServer())
           .post(signInUrl)
@@ -520,7 +535,7 @@ describe('AppController (e2e)', () => {
   });
 
   describe('api/users', () => {
-    const baseUrl = '/api/users/';
+    const baseUrl = '/api/users';
 
     describe('find-user', () => {
       it('should throw 404 if id is not found', async () => {
@@ -531,14 +546,14 @@ describe('AppController (e2e)', () => {
 
       it('should throw 404 if username is not found', async () => {
         await request(app.getHttpServer())
-          .get(baseUrl + 'invalid-username')
+          .get(baseUrl + '/invalid-username')
           .expect(HttpStatus.NOT_FOUND);
       });
 
       let username: string;
       it('should get user by id', async () => {
         const response = await request(app.getHttpServer())
-          .get(baseUrl + mockUser.id)
+          .get(baseUrl + '/' + mockUser.id)
           .expect(HttpStatus.OK);
 
         expect(response.body).toMatchObject({
@@ -554,7 +569,7 @@ describe('AppController (e2e)', () => {
 
       it('should get user by username', async () => {
         const response = await request(app.getHttpServer())
-          .get(baseUrl + username)
+          .get(baseUrl + '/' + username)
           .expect(HttpStatus.OK);
 
         expect(response.body).toMatchObject({
@@ -569,7 +584,7 @@ describe('AppController (e2e)', () => {
 
     const newEmail2 = faker.internet.email().toLowerCase();
     describe('email', () => {
-      const emailUrl = `${baseUrl}email`;
+      const emailUrl = `${baseUrl}/email`;
       let signInRes: request.Response;
 
       beforeAll(async () => {

@@ -7,7 +7,7 @@
 import { faker } from '@faker-js/faker';
 import { MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { CacheModule } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthResponseUserMapper } from '../../auth/mappers/auth-response-user.mapper';
@@ -16,7 +16,9 @@ import { createResponseMock } from '../../common/tests/mocks/response.mock';
 import { config } from '../../config';
 import { validationSchema } from '../../config/config.schema';
 import { MikroOrmConfig } from '../../config/mikroorm.config';
+import { OAuthProviderEntity } from '../entities/oauth-provider.entity';
 import { UserEntity } from '../entities/user.entity';
+import { OAuthProvidersEnum } from '../enums/oauth-providers.enum';
 import { ResponseUserMapper } from '../mappers/response-user.mapper';
 import { UsersController } from '../users.controller';
 import { UsersService } from '../users.service';
@@ -48,7 +50,7 @@ describe('UsersController', () => {
           imports: [ConfigModule],
           useClass: MikroOrmConfig,
         }),
-        MikroOrmModule.forFeature([UserEntity]),
+        MikroOrmModule.forFeature([UserEntity, OAuthProviderEntity]),
         CommonModule,
       ],
       providers: [UsersService, CommonModule],
@@ -60,7 +62,12 @@ describe('UsersController', () => {
     orm = module.get<MikroORM>(MikroORM);
     await orm.getSchemaGenerator().createSchema();
 
-    user = await service.create(email, name, password);
+    user = await service.create(
+      OAuthProvidersEnum.LOCAL,
+      email,
+      name,
+      password,
+    );
   });
 
   it('should be defined', () => {
@@ -100,7 +107,12 @@ describe('UsersController', () => {
     let username: string;
 
     beforeAll(async () => {
-      const user2 = await service.create(email2, name2, password2);
+      const user2 = await service.create(
+        OAuthProvidersEnum.LOCAL,
+        email2,
+        name2,
+        password2,
+      );
       username = user2.username;
     });
 

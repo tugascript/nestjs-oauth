@@ -4,15 +4,23 @@
   Afonso Barracha
 */
 
-import { Embedded, Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+  Collection,
+  Embedded,
+  Entity,
+  OneToMany,
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core';
 import { IsBoolean, IsEmail, IsString, Length, Matches } from 'class-validator';
 import {
-  BCRYPT_HASH,
+  BCRYPT_HASH_OR_UNSET,
   NAME_REGEX,
   SLUG_REGEX,
 } from '../../common/consts/regex.const';
 import { CredentialsEmbeddable } from '../embeddables/credentials.embeddable';
 import { IUser } from '../interfaces/user.interface';
+import { OAuthProviderEntity } from './oauth-provider.entity';
 
 @Entity({ tableName: 'users' })
 export class UserEntity implements IUser {
@@ -43,8 +51,8 @@ export class UserEntity implements IUser {
 
   @Property({ columnType: 'varchar', length: 60 })
   @IsString()
-  @Length(59, 60)
-  @Matches(BCRYPT_HASH)
+  @Length(5, 60)
+  @Matches(BCRYPT_HASH_OR_UNSET)
   public password: string;
 
   @Property({ columnType: 'boolean', default: false })
@@ -59,4 +67,7 @@ export class UserEntity implements IUser {
 
   @Property({ onUpdate: () => new Date() })
   public updatedAt: Date = new Date();
+
+  @OneToMany(() => OAuthProviderEntity, (oauth) => oauth.user)
+  public oauthProviders = new Collection<OAuthProviderEntity, UserEntity>(this);
 }

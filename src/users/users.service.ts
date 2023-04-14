@@ -4,6 +4,7 @@
   Afonso Barracha
 */
 
+import { QueryOrder } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import {
@@ -20,21 +21,28 @@ import { isNull, isUndefined } from '../common/utils/validation.util';
 import { ChangeEmailDto } from './dtos/change-email.dto';
 import { PasswordDto } from './dtos/password.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { CredentialsEmbeddable } from './embeddables/credentials.embeddable';
+import { OAuthProviderEntity } from './entities/oauth-provider.entity';
 import { UserEntity } from './entities/user.entity';
+import { OAuthProvidersEnum } from './enums/oauth-providers.enum';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly usersRepository: EntityRepository<UserEntity>,
+    @InjectRepository(OAuthProviderEntity)
+    private readonly oauthProvidersRepository: EntityRepository<OAuthProviderEntity>,
     private readonly commonService: CommonService,
   ) {}
 
   public async create(
+    provider: OAuthProvidersEnum,
     email: string,
     name: string,
-    password: string,
+    password?: string,
   ): Promise<UserEntity> {
+    const isConfirmed = provider !== OAuthProvidersEnum.LOCAL;
     const formattedEmail = email.toLowerCase();
     await this.checkEmailUniqueness(formattedEmail);
     const formattedName = this.commonService.formatName(name);
@@ -42,9 +50,12 @@ export class UsersService {
       email: formattedEmail,
       name: formattedName,
       username: await this.generateUsername(formattedName),
-      password: await hash(password, 10),
+      password: isUndefined(password) ? 'UNSET' : await hash(password, 10),
+      confirmed: isConfirmed,
+      credentials: new CredentialsEmbeddable(isConfirmed),
     });
     await this.commonService.saveEntity(this.usersRepository, user, true);
+    await this.createOAuthProvider(provider, user.id);
     return user;
   }
 
@@ -164,22 +175,26 @@ export class UsersService {
 
   public async updatePassword(
     userId: number,
-    password: string,
     newPassword: string,
+    password?: string,
   ): Promise<UserEntity> {
     const user = await this.findOneById(userId);
 
-    if (!(await compare(password, user.password))) {
-      throw new BadRequestException('Wrong password');
-    }
-    if (await compare(newPassword, user.password)) {
-      throw new BadRequestException('New password must be different');
+    if (user.password === 'UNSET') {
+      await this.createOAuthProvider(OAuthProvidersEnum.LOCAL, user.id);
+    } else {
+      if (isUndefined(password) || isNull(password)) {
+        throw new BadRequestException('Password is required');
+      }
+      if (!(await compare(password, user.password))) {
+        throw new BadRequestException('Wrong password');
+      }
+      if (await compare(newPassword, user.password)) {
+        throw new BadRequestException('New password must be different');
+      }
     }
 
-    user.credentials.updatePassword(user.password);
-    user.password = await hash(newPassword, 10);
-    await this.commonService.saveEntity(this.usersRepository, user);
-    return user;
+    return await this.changePassword(user, newPassword);
   }
 
   public async resetPassword(
@@ -188,10 +203,7 @@ export class UsersService {
     password: string,
   ): Promise<UserEntity> {
     const user = await this.findOneByCredentials(userId, version);
-    user.credentials.updatePassword(user.password);
-    user.password = await hash(password, 10);
-    await this.commonService.saveEntity(this.usersRepository, user);
-    return user;
+    return await this.changePassword(user, password);
   }
 
   public async updateEmail(
@@ -225,6 +237,56 @@ export class UsersService {
     }
 
     await this.commonService.removeEntity(this.usersRepository, user);
+    return user;
+  }
+
+  public async findOrCreate(
+    provider: OAuthProvidersEnum,
+    email: string,
+    name: string,
+  ): Promise<UserEntity> {
+    const formattedEmail = email.toLowerCase();
+    const user = await this.usersRepository.findOne(
+      {
+        email: formattedEmail,
+      },
+      {
+        populate: ['oauthProviders'],
+      },
+    );
+
+    if (isUndefined(user) || isNull(user)) {
+      return this.create(provider, email, name);
+    }
+    if (
+      isUndefined(
+        user.oauthProviders.getItems().find((p) => p.provider === provider),
+      )
+    ) {
+      await this.createOAuthProvider(provider, user.id);
+    }
+
+    return user;
+  }
+
+  public async findOAuthProviders(
+    userId: number,
+  ): Promise<OAuthProviderEntity[]> {
+    return await this.oauthProvidersRepository.find(
+      {
+        user: userId,
+      },
+      { orderBy: { provider: QueryOrder.ASC } },
+    );
+  }
+
+  private async changePassword(
+    user: UserEntity,
+    password: string,
+  ): Promise<UserEntity> {
+    user.credentials.updatePassword(user.password);
+    user.password = await hash(password, 10);
+    await this.commonService.saveEntity(this.usersRepository, user);
     return user;
   }
 
@@ -271,5 +333,21 @@ export class UsersService {
     }
 
     return pointSlug;
+  }
+
+  private async createOAuthProvider(
+    provider: OAuthProvidersEnum,
+    userId: number,
+  ): Promise<OAuthProviderEntity> {
+    const oauthProvider = this.oauthProvidersRepository.create({
+      provider,
+      user: userId,
+    });
+    await this.commonService.saveEntity(
+      this.oauthProvidersRepository,
+      oauthProvider,
+      true,
+    );
+    return oauthProvider;
   }
 }

@@ -11,4 +11,5 @@ export const PASSWORD_REGEX =
 // checks if a string has only letters, numbers, spaces, apostrophes, dots and dashes
 export const NAME_REGEX = /(^[\p{L}\d'\.\s\-]*$)/u;
 export const SLUG_REGEX = /^[a-z\d]+(?:(\.|-|_)[a-z\d]+)*$/;
-export const BCRYPT_HASH = /\$2[abxy]?\$\d{1,2}\$[A-Za-z\d\./]{53}/;
+export const BCRYPT_HASH_OR_UNSET =
+  /(UNSET|(\$2[abxy]?\$\d{1,2}\$[A-Za-z\d\./]{53}))/;
