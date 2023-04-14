@@ -180,19 +180,18 @@ export class UsersService {
   ): Promise<UserEntity> {
     const user = await this.findOneById(userId);
 
-    if (user.password !== 'UNSET') {
+    if (user.password === 'UNSET') {
+      await this.createOAuthProvider(OAuthProvidersEnum.LOCAL, user.id);
+    } else {
       if (isUndefined(password) || isNull(password)) {
         throw new BadRequestException('Password is required');
       }
       if (!(await compare(password, user.password))) {
         throw new BadRequestException('Wrong password');
       }
-    }
-    if (await compare(newPassword, user.password)) {
-      throw new BadRequestException('New password must be different');
-    }
-    if (user.password === 'UNSET') {
-      await this.createOAuthProvider(OAuthProvidersEnum.LOCAL, user.id);
+      if (await compare(newPassword, user.password)) {
+        throw new BadRequestException('New password must be different');
+      }
     }
 
     return await this.changePassword(user, newPassword);
