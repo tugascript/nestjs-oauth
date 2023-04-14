@@ -4,7 +4,7 @@
   Afonso Barracha
 */
 
-export interface IAuth {
+export interface IProvider {
   readonly tokenHost: string;
   readonly tokenPath: string;
   readonly authorizeHost: string;

@@ -7,30 +7,30 @@
 import { randomBytes } from 'crypto';
 import { AuthorizationCode } from 'simple-oauth2';
 import { OAuthProvidersEnum } from '../../users/enums/oauth-providers.enum';
-import { IAuth } from '../interfaces/auth.interface';
-import { IAuthorization } from '../interfaces/authorization.interface';
+import { IAuthParams } from '../interfaces/auth-params.interface';
 import { IClient } from '../interfaces/client.interface';
+import { IProvider } from '../interfaces/provider.interface';
 
 export class OAuthClass {
-  private static readonly [OAuthProvidersEnum.MICROSOFT]: IAuth = {
+  private static readonly [OAuthProvidersEnum.MICROSOFT]: IProvider = {
     authorizeHost: 'https://login.microsoftonline.com',
     authorizePath: '/common/oauth2/v2.0/authorize',
     tokenHost: 'https://login.microsoftonline.com',
     tokenPath: '/common/oauth2/v2.0/token',
   };
-  private static readonly [OAuthProvidersEnum.GOOGLE]: IAuth = {
+  private static readonly [OAuthProvidersEnum.GOOGLE]: IProvider = {
     authorizeHost: 'https://accounts.google.com',
     authorizePath: '/o/oauth2/v2/auth',
     tokenHost: 'https://www.googleapis.com',
     tokenPath: '/oauth2/v4/token',
   };
-  private static readonly [OAuthProvidersEnum.FACEBOOK]: IAuth = {
+  private static readonly [OAuthProvidersEnum.FACEBOOK]: IProvider = {
     authorizeHost: 'https://facebook.com',
     authorizePath: '/v9.0/dialog/oauth',
     tokenHost: 'https://graph.facebook.com',
     tokenPath: '/v9.0/oauth/access_token',
   };
-  private static readonly [OAuthProvidersEnum.GITHUB]: IAuth = {
+  private static readonly [OAuthProvidersEnum.GITHUB]: IProvider = {
     authorizeHost: 'https://github.com',
     authorizePath: '/login/oauth/authorize',
     tokenHost: 'https://github.com',
@@ -38,7 +38,7 @@ export class OAuthClass {
   };
 
   private readonly code: AuthorizationCode;
-  private readonly authorization: IAuthorization;
+  private readonly authorization: IAuthParams;
   private readonly userDataUrl: string;
 
   constructor(
@@ -73,7 +73,7 @@ export class OAuthClass {
   private static genAuthorization(
     provider: OAuthProvidersEnum,
     url: string,
-  ): IAuthorization {
+  ): IAuthParams {
     const redirect_uri = `${url}/${provider.toLowerCase()}/callback`;
     const state = randomBytes(16).toString('hex');
 
