@@ -252,7 +252,7 @@ export class UsersService {
         email: formattedEmail,
       },
       {
-        populate: ['authProviders'],
+        populate: ['oauthProviders'],
       },
     );
 
@@ -261,7 +261,7 @@ export class UsersService {
     }
     if (
       isUndefined(
-        user.authProviders.getItems().find((p) => p.provider === provider),
+        user.oauthProviders.getItems().find((p) => p.provider === provider),
       )
     ) {
       await this.createOAuthProvider(provider, user.id);

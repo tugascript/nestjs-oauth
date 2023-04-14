@@ -69,5 +69,5 @@ export class UserEntity implements IUser {
   public updatedAt: Date = new Date();
 
   @OneToMany(() => OAuthProviderEntity, (oauth) => oauth.user)
-  public authProviders = new Collection<OAuthProviderEntity, UserEntity>(this);
+  public oauthProviders = new Collection<OAuthProviderEntity, UserEntity>(this);
 }
