@@ -622,13 +622,13 @@ __metadata:
   linkType: hard
 
 "@fastify/csrf-protection@npm:^6.2.0":
-  version: 6.2.0
-  resolution: "@fastify/csrf-protection@npm:6.2.0"
+  version: 6.4.1
+  resolution: "@fastify/csrf-protection@npm:6.4.1"
   dependencies:
     "@fastify/csrf": ^6.0.0
     "@fastify/error": ^3.0.0
     fastify-plugin: ^4.0.0
-  checksum: 82afb8a6cd191fd59be09d78655c3a66c60ffaac0da7530abeb29416c2de8e497168704bff53625419c4e42f1e8762e2052bb56588573f383e27666e57cf6285
+  checksum: 70579c29d43dd0da0694fdd0e5e24c36389f8b4f0f349b30c13ae2baa6bbadc5c1a47f37da507058a50e1113783da1bb19a9e28482bdf7546fc95309a2f0750e
   languageName: node
   linkType: hard
 
