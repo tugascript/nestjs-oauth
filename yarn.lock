@@ -3001,23 +3001,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cache-manager@npm:^5.1.0":
-  version: 5.1.4
-  resolution: "cache-manager@npm:5.1.4"
+"cache-manager@npm:^5.1.0, cache-manager@npm:^5.2.0":
+  version: 5.7.6
+  resolution: "cache-manager@npm:5.7.6"
   dependencies:
+    eventemitter3: ^5.0.1
     lodash.clonedeep: ^4.5.0
-    lru-cache: ^7.14.0
-  checksum: 4f2d6a0bee6e198976ffc73947c9bceaf68ea1c0f1c361e1264c4158cd80ec45c991a1359d1848a52bb95faaad20c0b244cf002f2fd4d3e1485dbfb8d303c5b8
-  languageName: node
-  linkType: hard
-
-"cache-manager@npm:^5.2.0":
-  version: 5.2.0
-  resolution: "cache-manager@npm:5.2.0"
-  dependencies:
-    lodash.clonedeep: ^4.5.0
-    lru-cache: ~7.18.3
-  checksum: 1f1ec19c902c01817af782c2fc3ba96705325794e20fc4865ec9382eb91c1cee76dc560a63f774cb54b85067142134b5338183c4cc7f465375fb063ce62b84ac
+    lru-cache: ^10.2.2
+    promise-coalesce: ^1.1.2
+  checksum: c61d30e2824f99f04af8e14a2e98c2274daa276cce82f64f0ac4c4bd59cf30e1ad9dec4028148206ad729196b242940476602e2f12496366d6f3f4b9da7c24c5
   languageName: node
   linkType: hard
 
@@ -3921,6 +3913,13 @@ __metadata:
   version: 5.0.1
   resolution: "event-target-shim@npm:5.0.1"
   checksum: 1ffe3bb22a6d51bdeb6bf6f7cf97d2ff4a74b017ad12284cc9e6a279e727dc30a5de6bb613e5596ff4dc3e517841339ad09a7eec44266eccb1aa201a30448166
+  languageName: node
+  linkType: hard
+
+"eventemitter3@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "eventemitter3@npm:5.0.1"
+  checksum: 543d6c858ab699303c3c32e0f0f47fc64d360bf73c3daf0ac0b5079710e340d6fe9f15487f94e66c629f5f82cd1a8678d692f3dbb6f6fcd1190e1b97fcad36f8
   languageName: node
   linkType: hard
 
@@ -5912,6 +5911,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lru-cache@npm:^10.2.2":
+  version: 10.4.3
+  resolution: "lru-cache@npm:10.4.3"
+  checksum: 6476138d2125387a6d20f100608c2583d415a4f64a0fecf30c9e2dda976614f09cad4baa0842447bd37dd459a7bd27f57d9d8f8ce558805abd487c583f3d774a
+  languageName: node
+  linkType: hard
+
 "lru-cache@npm:^5.1.1":
   version: 5.1.1
   resolution: "lru-cache@npm:5.1.1"
@@ -5930,7 +5936,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lru-cache@npm:^7.14.0, lru-cache@npm:^7.7.1":
+"lru-cache@npm:^7.7.1":
   version: 7.14.1
   resolution: "lru-cache@npm:7.14.1"
   checksum: d72c6713c6a6d86836a7a6523b3f1ac6764768cca47ec99341c3e76db06aacd4764620e5e2cda719a36848785a52a70e531822dc2b33fb071fa709683746c104
@@ -5941,13 +5947,6 @@ __metadata:
   version: 9.0.3
   resolution: "lru-cache@npm:9.0.3"
   checksum: 218415714d44c113bc3a8d12ceca6dedf310915aa861f9e0df13df1fe6db9833e1b5f1f656e9a117ac82677ad3e499be23bff2f670f2a7c5c186d64a92596b68
-  languageName: node
-  linkType: hard
-
-"lru-cache@npm:~7.18.3":
-  version: 7.18.3
-  resolution: "lru-cache@npm:7.18.3"
-  checksum: e550d772384709deea3f141af34b6d4fa392e2e418c1498c078de0ee63670f1f46f5eee746e8ef7e69e1c895af0d4224e62ee33e66a543a14763b0f2e74c1356
   languageName: node
   linkType: hard
 
@@ -7089,6 +7088,13 @@ __metadata:
   version: 0.11.10
   resolution: "process@npm:0.11.10"
   checksum: bfcce49814f7d172a6e6a14d5fa3ac92cc3d0c3b9feb1279774708a719e19acd673995226351a082a9ae99978254e320ccda4240ddc474ba31a76c79491ca7c3
+  languageName: node
+  linkType: hard
+
+"promise-coalesce@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "promise-coalesce@npm:1.1.2"
+  checksum: 6f951b5db40ca78d09ad0f72adea0a2e9c5bdb0fc5b3ef218c611e2191c6ce2e9f752f815630fd07875dd1c9f04cc7327d6bada04b662dce986ce86ab88c2d5e
   languageName: node
   linkType: hard
 
