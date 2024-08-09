@@ -70,7 +70,7 @@
     "@types/handlebars": "^4.1.0",
     "@types/jest": "29.5.0",
     "@types/jsonwebtoken": "^9.0.1",
-    "@types/node": "18.15.11",
+    "@types/node": "18.19.44",
     "@types/nodemailer": "^6.4.7",
     "@types/simple-oauth2": "^5.0.4",
     "@types/supertest": "^2.0.12",
