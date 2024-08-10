@@ -153,8 +153,8 @@ export class Oauth2Service {
     state: string,
   ): Promise<string> {
     const oauth = this.getOAuth(provider);
-    const stateProvider = await this.cacheManager.get<OAuthProvidersEnum>(
-      this.getOAuthStateKey(state),
+    const stateProvider = await this.commonService.throwInternalError(
+      this.cacheManager.get<OAuthProvidersEnum>(this.getOAuthStateKey(state)),
     );
 
     if (!stateProvider || provider !== stateProvider) {
