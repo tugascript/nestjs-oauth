@@ -51,4 +51,5 @@ $ yarn test:e2e
 
 ## License
 
-The code of this tutorial is licensed under the GNU LGPLv3 - see the [LICENSE](LICENSE) file for details.
+The code of this tutorial is licensed under the GNU Lesser General Public License v3.0. See the [Copying](COPYING)
+and [Copying Lesser](COPYING.LESSER) files for details.

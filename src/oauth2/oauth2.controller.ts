@@ -1,7 +1,18 @@
 /*
-  Free and Open Source - GNU LGPLv3
-  Copyright © 2023
-  Afonso Barracha
+ Copyright (C) 2024 Afonso Barracha
+
+ Nest OAuth is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Nest OAuth is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with Nest OAuth.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import {
@@ -58,7 +69,7 @@ export class Oauth2Controller {
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for Microsoft',
   })
-  public microsoft(@Res() res: FastifyReply): FastifyReply {
+  public async microsoft(@Res() res: FastifyReply): Promise<FastifyReply> {
     return this.startRedirect(res, OAuthProvidersEnum.MICROSOFT);
   }
 
@@ -92,7 +103,7 @@ export class Oauth2Controller {
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for Google',
   })
-  public google(@Res() res: FastifyReply): FastifyReply {
+  public async google(@Res() res: FastifyReply): Promise<FastifyReply> {
     return this.startRedirect(res, OAuthProvidersEnum.GOOGLE);
   }
 
@@ -128,7 +139,7 @@ export class Oauth2Controller {
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for Facebook',
   })
-  public facebook(@Res() res: FastifyReply): FastifyReply {
+  public async facebook(@Res() res: FastifyReply): Promise<FastifyReply> {
     return this.startRedirect(res, OAuthProvidersEnum.FACEBOOK);
   }
 
@@ -164,7 +175,7 @@ export class Oauth2Controller {
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for GitHub',
   })
-  public github(@Res() res: FastifyReply): FastifyReply {
+  public async github(@Res() res: FastifyReply): Promise<FastifyReply> {
     return this.startRedirect(res, OAuthProvidersEnum.GITHUB);
   }
 
@@ -190,13 +201,13 @@ export class Oauth2Controller {
     return this.loginAndRedirect(res, provider, email, name);
   }
 
-  private startRedirect(
+  private async startRedirect(
     res: FastifyReply,
     provider: OAuthProvidersEnum,
-  ): FastifyReply {
+  ): Promise<FastifyReply> {
     return res
       .status(HttpStatus.TEMPORARY_REDIRECT)
-      .redirect(this.oauth2Service.getAuthorizationUrl(provider));
+      .redirect(await this.oauth2Service.getAuthorizationUrl(provider));
   }
 
   private async loginAndRedirect(

@@ -1,11 +1,21 @@
 /*
-  Free and Open Source - GNU LGPLv3
-  Copyright © 2023
-  Afonso Barracha
+ Copyright (C) 2024 Afonso Barracha
+
+ Nest OAuth is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Nest OAuth is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with Nest OAuth.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Dictionary } from '@mikro-orm/core';
-import { EntityRepository } from '@mikro-orm/postgresql';
+import { Dictionary, EntityManager } from '@mikro-orm/core';
 import {
   BadRequestException,
   ConflictException,
@@ -24,7 +34,7 @@ import { isNull, isUndefined } from './utils/validation.util';
 export class CommonService {
   private readonly loggerService: LoggerService;
 
-  constructor() {
+  constructor(private readonly entityManager: EntityManager) {
     this.loggerService = new Logger(CommonService.name);
   }
 
@@ -66,17 +76,16 @@ export class CommonService {
    * Validates, saves and flushes entities into the DB
    */
   public async saveEntity<T extends Dictionary>(
-    repo: EntityRepository<T>,
     entity: T,
     isNew = false,
   ): Promise<void> {
     await this.validateEntity(entity);
 
     if (isNew) {
-      repo.persist(entity);
+      this.entityManager.persist(entity);
     }
 
-    await this.throwDuplicateError(repo.flush());
+    await this.throwDuplicateError(this.entityManager.flush());
   }
 
   /**
@@ -84,11 +93,8 @@ export class CommonService {
    *
    * Removes an entities from the DB.
    */
-  public async removeEntity<T extends Dictionary>(
-    repo: EntityRepository<T>,
-    entity: T,
-  ): Promise<void> {
-    await this.throwInternalError(repo.removeAndFlush(entity));
+  public async removeEntity<T extends Dictionary>(entity: T): Promise<void> {
+    await this.throwInternalError(this.entityManager.removeAndFlush(entity));
   }
 
   /**
