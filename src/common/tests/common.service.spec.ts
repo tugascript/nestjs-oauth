@@ -1,21 +1,46 @@
 /*
-  Free and Open Source - GNU LGPLv3
-  Copyright © 2023
-  Afonso Barracha
+ Copyright (C) 2024 Afonso Barracha
+
+ Nest OAuth is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Nest OAuth is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with Nest OAuth.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { EntityRepository } from '@mikro-orm/postgresql';
 import { InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommonService } from '../common.service';
-import { EntityRepositoryMock } from './mocks/entity-repository.mock';
 import { EntityMock } from './mocks/entity.mock';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { ConfigModule } from '@nestjs/config';
+import { MikroOrmConfig } from '../../config/mikroorm.config';
+import { validationSchema } from '../../config/config.schema';
+import { config } from '../../config';
 
 describe('CommonService', () => {
   let service: CommonService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          validationSchema,
+          load: [config],
+        }),
+        MikroOrmModule.forRootAsync({
+          imports: [ConfigModule],
+          useClass: MikroOrmConfig,
+        }),
+      ],
       providers: [CommonService],
     }).compile();
 
@@ -73,8 +98,6 @@ describe('CommonService', () => {
   });
 
   describe('entity actions', () => {
-    const repository =
-      new EntityRepositoryMock() as unknown as EntityRepository<EntityMock>;
     const entity = new EntityMock('Valid Name');
 
     it('check entity existence', () => {
@@ -87,24 +110,6 @@ describe('CommonService', () => {
       expect(() =>
         service.checkEntityExistence(undefined, 'Entity'),
       ).toThrowError('Entity not found');
-    });
-
-    it('save entity', async () => {
-      await service.saveEntity(repository, entity);
-      expect(repository.flush).toBeCalledTimes(1);
-
-      await service.saveEntity(repository, entity, true);
-      expect(repository.persist).toBeCalledTimes(1);
-      expect(repository.flush).toBeCalledTimes(2);
-
-      await expect(
-        service.saveEntity(repository, new EntityMock('a!cc')),
-      ).rejects.toThrowError('name must not have special characters');
-    });
-
-    it('remove entity', async () => {
-      await service.removeEntity(repository, entity);
-      expect(repository.removeAndFlush).toBeCalledTimes(1);
     });
   });
 

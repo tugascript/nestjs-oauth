@@ -1,11 +1,23 @@
 /*
-  Free and Open Source - GNU LGPLv3
-  Copyright © 2023
-  Afonso Barracha
+ Copyright (C) 2024 Afonso Barracha
+
+ Nest OAuth is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Nest OAuth is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with Nest OAuth.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { HttpService } from '@nestjs/axios';
 import {
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -21,6 +33,8 @@ import { UsersService } from '../users/users.service';
 import { OAuthClass } from './classes/oauth.class';
 import { ICallbackQuery } from './interfaces/callback-query.interface';
 import { IClient } from './interfaces/client.interface';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class Oauth2Service {
@@ -30,6 +44,8 @@ export class Oauth2Service {
   private readonly [OAuthProvidersEnum.GITHUB]: OAuthClass | null;
 
   constructor(
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache,
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -75,8 +91,14 @@ export class Oauth2Service {
     return new OAuthClass(provider, client, url);
   }
 
-  public getAuthorizationUrl(provider: OAuthProvidersEnum): string {
-    return this.getOAuth(provider).authorizationUrl;
+  public async getAuthorizationUrl(
+    provider: OAuthProvidersEnum,
+  ): Promise<string> {
+    const [url, state] = this.getOAuth(provider).authorizationUrl;
+    await this.commonService.throwInternalError(
+      this.cacheManager.set(this.getOAuthStateKey(state), provider, 120 * 1000),
+    );
+    return url;
   }
 
   public async getUserData<T extends Record<string, any>>(
@@ -111,6 +133,10 @@ export class Oauth2Service {
     return this.jwtService.generateAuthTokens(user);
   }
 
+  private getOAuthStateKey(state: string): string {
+    return `oauth_state:${state}`;
+  }
+
   private getOAuth(provider: OAuthProvidersEnum): OAuthClass {
     const oauth = this[provider];
 
@@ -127,8 +153,11 @@ export class Oauth2Service {
     state: string,
   ): Promise<string> {
     const oauth = this.getOAuth(provider);
+    const stateProvider = await this.cacheManager.get<OAuthProvidersEnum>(
+      this.getOAuthStateKey(state),
+    );
 
-    if (state !== oauth.state) {
+    if (!stateProvider || provider !== stateProvider) {
       throw new UnauthorizedException('Corrupted state');
     }
 

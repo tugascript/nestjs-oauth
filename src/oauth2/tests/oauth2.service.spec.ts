@@ -1,7 +1,18 @@
 /*
-  Free and Open Source - GNU LGPLv3
-  Copyright © 2023
-  Afonso Barracha
+ Copyright (C) 2024 Afonso Barracha
+
+ Nest OAuth is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Nest OAuth is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with Nest OAuth.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { faker } from '@faker-js/faker';
@@ -73,8 +84,8 @@ describe('Oauth2Service', () => {
   });
 
   describe('getAuthorizationUrl', () => {
-    it('should return the microsoft authorization url', () => {
-      const url = oauth2Service.getAuthorizationUrl(
+    it('should return the microsoft authorization url', async () => {
+      const url = await oauth2Service.getAuthorizationUrl(
         OAuthProvidersEnum.MICROSOFT,
       );
       expect(url).toBeDefined();
@@ -82,20 +93,24 @@ describe('Oauth2Service', () => {
         'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
       );
     });
-    it('should return the google authorization url', () => {
-      const url = oauth2Service.getAuthorizationUrl(OAuthProvidersEnum.GOOGLE);
+    it('should return the google authorization url', async () => {
+      const url = await oauth2Service.getAuthorizationUrl(
+        OAuthProvidersEnum.GOOGLE,
+      );
       expect(url).toBeDefined();
       expect(url).toContain('https://accounts.google.com/o/oauth2/v2/auth');
     });
-    it('should return the facebook authorization url', () => {
-      const url = oauth2Service.getAuthorizationUrl(
+    it('should return the facebook authorization url', async () => {
+      const url = await oauth2Service.getAuthorizationUrl(
         OAuthProvidersEnum.FACEBOOK,
       );
       expect(url).toBeDefined();
       expect(url).toContain('https://facebook.com/v9.0/dialog/oauth');
     });
-    it('should return the github authorization url', () => {
-      const url = oauth2Service.getAuthorizationUrl(OAuthProvidersEnum.GITHUB);
+    it('should return the github authorization url', async () => {
+      const url = await oauth2Service.getAuthorizationUrl(
+        OAuthProvidersEnum.GITHUB,
+      );
       expect(url).toBeDefined();
       expect(url).toContain('https://github.com/login/oauth/authorize');
     });

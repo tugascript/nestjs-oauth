@@ -1,7 +1,18 @@
 /*
-  Free and Open Source - GNU LGPLv3
-  Copyright © 2023
-  Afonso Barracha
+ Copyright (C) 2024 Afonso Barracha
+
+ Nest OAuth is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Nest OAuth is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with Nest OAuth.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { QueryOrder } from '@mikro-orm/core';
@@ -54,7 +65,7 @@ export class UsersService {
       confirmed: isConfirmed,
       credentials: new CredentialsEmbeddable(isConfirmed),
     });
-    await this.commonService.saveEntity(this.usersRepository, user, true);
+    await this.commonService.saveEntity(user, true);
     await this.createOAuthProvider(provider, user.id);
     return user;
   }
@@ -143,7 +154,7 @@ export class UsersService {
 
     user.confirmed = true;
     user.credentials.updateVersion();
-    await this.commonService.saveEntity(this.usersRepository, user);
+    await this.commonService.saveEntity(user);
     return user;
   }
 
@@ -169,7 +180,7 @@ export class UsersService {
       user.username = formattedUsername;
     }
 
-    await this.commonService.saveEntity(this.usersRepository, user);
+    await this.commonService.saveEntity(user);
     return user;
   }
 
@@ -225,7 +236,7 @@ export class UsersService {
 
     await this.checkEmailUniqueness(formattedEmail);
     user.email = formattedEmail;
-    await this.commonService.saveEntity(this.usersRepository, user);
+    await this.commonService.saveEntity(user);
     return user;
   }
 
@@ -236,7 +247,7 @@ export class UsersService {
       throw new BadRequestException('Wrong password');
     }
 
-    await this.commonService.removeEntity(this.usersRepository, user);
+    await this.commonService.removeEntity(user);
     return user;
   }
 
@@ -286,7 +297,7 @@ export class UsersService {
   ): Promise<UserEntity> {
     user.credentials.updatePassword(user.password);
     user.password = await hash(password, 10);
-    await this.commonService.saveEntity(this.usersRepository, user);
+    await this.commonService.saveEntity(user);
     return user;
   }
 
@@ -343,11 +354,7 @@ export class UsersService {
       provider,
       user: userId,
     });
-    await this.commonService.saveEntity(
-      this.oauthProvidersRepository,
-      oauthProvider,
-      true,
-    );
+    await this.commonService.saveEntity(oauthProvider, true);
     return oauthProvider;
   }
 }

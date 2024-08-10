@@ -1,15 +1,26 @@
 /*
-  Free and Open Source - GNU LGPLv3
-  Copyright © 2023
-  Afonso Barracha
+ Copyright (C) 2024 Afonso Barracha
+
+ Nest OAuth is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Nest OAuth is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with Nest OAuth.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { randomBytes } from 'crypto';
 import { AuthorizationCode } from 'simple-oauth2';
 import { OAuthProvidersEnum } from '../../users/enums/oauth-providers.enum';
 import { IAuthParams } from '../interfaces/auth-params.interface';
 import { IClient } from '../interfaces/client.interface';
 import { IProvider } from '../interfaces/provider.interface';
+import { randomBytes } from 'crypto';
 
 export class OAuthClass {
   private static readonly [OAuthProvidersEnum.MICROSOFT]: IProvider = {
@@ -67,16 +78,13 @@ export class OAuthClass {
     this.userDataUrl = OAuthClass.userDataUrls[provider];
   }
 
-  public get state(): string {
-    return this.authorization.state;
-  }
-
   public get dataUrl(): string {
     return this.userDataUrl;
   }
 
-  public get authorizationUrl(): string {
-    return this.code.authorizeURL(this.authorization);
+  public get authorizationUrl(): [string, string] {
+    const state = randomBytes(16).toString('hex');
+    return [this.code.authorizeURL({ ...this.authorization, state }), state];
   }
 
   private static genAuthorization(
@@ -84,12 +92,10 @@ export class OAuthClass {
     url: string,
   ): IAuthParams {
     const redirect_uri = `${url}/api/auth/ext/${provider}/callback`;
-    const state = randomBytes(16).toString('hex');
 
     switch (provider) {
       case OAuthProvidersEnum.GOOGLE:
         return {
-          state,
           redirect_uri,
           scope: [
             'https://www.googleapis.com/auth/userinfo.email',
@@ -98,19 +104,16 @@ export class OAuthClass {
         };
       case OAuthProvidersEnum.MICROSOFT:
         return {
-          state,
           redirect_uri,
           scope: ['openid', 'profile', 'email'],
         };
       case OAuthProvidersEnum.FACEBOOK:
         return {
-          state,
           redirect_uri,
           scope: ['email', 'public_profile'],
         };
       case OAuthProvidersEnum.GITHUB:
         return {
-          state,
           redirect_uri,
           scope: ['user:email', 'read:user'],
         };

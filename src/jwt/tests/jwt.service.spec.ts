@@ -1,7 +1,18 @@
 /*
-  Free and Open Source - GNU LGPLv3
-  Copyright © 2023
-  Afonso Barracha
+ Copyright (C) 2024 Afonso Barracha
+
+ Nest OAuth is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Nest OAuth is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with Nest OAuth.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { faker } from '@faker-js/faker';
@@ -19,6 +30,8 @@ import { IAccessToken } from '../interfaces/access-token.interface';
 import { IEmailToken } from '../interfaces/email-token.interface';
 import { IRefreshToken } from '../interfaces/refresh-token.interface';
 import { JwtService } from '../jwt.service';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { MikroOrmConfig } from '../../config/mikroorm.config';
 
 describe('JwtService', () => {
   let service: JwtService;
@@ -30,6 +43,10 @@ describe('JwtService', () => {
           isGlobal: true,
           validationSchema,
           load: [config],
+        }),
+        MikroOrmModule.forRootAsync({
+          imports: [ConfigModule],
+          useClass: MikroOrmConfig,
         }),
         CommonModule,
       ],
