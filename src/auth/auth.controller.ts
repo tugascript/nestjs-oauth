@@ -49,6 +49,7 @@ import { Public } from './decorators/public.decorator';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { ConfirmEmailDto } from './dtos/confirm-email.dto';
 import { EmailDto } from './dtos/email.dto';
+import { RefreshAccessDto } from './dtos/refresh-access.dto';
 import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { SignInDto } from './dtos/sign-in.dto';
 import { SignUpDto } from './dtos/sign-up.dto';
@@ -136,8 +137,9 @@ export class AuthController {
   public async refreshAccess(
     @Req() req: FastifyRequest,
     @Res() res: FastifyReply,
+    @Body() refreshAccessDto?: RefreshAccessDto,
   ): Promise<void> {
-    const token = this.refreshTokenFromReq(req);
+    const token = this.refreshTokenFromReq(req, refreshAccessDto);
     const result = await this.authService.refreshTokenAccess(
       token,
       req.headers.origin,
@@ -189,7 +191,7 @@ export class AuthController {
     @Body() confirmEmailDto: ConfirmEmailDto,
     @Res() res: FastifyReply,
   ): Promise<void> {
-    const result = await this.authService.confirmEmail(confirmEmailDto);
+    const result = await this.authService.confirmEmail(confirmEmailDto, origin);
     this.saveRefreshCookie(res, result.refreshToken)
       .status(HttpStatus.OK)
       .send(AuthResponseMapper.map(result));
@@ -279,10 +281,17 @@ export class AuthController {
     return OAuthProvidersResponseMapper.map(providers);
   }
 
-  private refreshTokenFromReq(req: FastifyRequest): string {
+  private refreshTokenFromReq(
+    req: FastifyRequest,
+    dto?: RefreshAccessDto,
+  ): string {
     const token: string | undefined = req.cookies[this.cookieName];
 
     if (isUndefined(token) || isNull(token)) {
+      if (!isUndefined(dto?.refreshToken)) {
+        return dto.refreshToken;
+      }
+
       throw new UnauthorizedException();
     }
 

@@ -15,11 +15,29 @@
  along with Nest OAuth.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { IAuthResponseUser } from './auth-response-user.interface';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, Length } from 'class-validator';
 
-export interface IAuthResponse {
-  user: IAuthResponseUser;
-  accessToken: string;
-  refreshToken: string;
-  tokenType: string;
+export abstract class TokenDto {
+  @ApiProperty({
+    description: 'The Code to exchange for a token',
+    example: '5WA0R4DVyWThKFnc73z7nT',
+    minLength: 1,
+    maxLength: 22,
+    type: String,
+  })
+  @IsString()
+  @Length(1, 22)
+  public code: string;
+
+  @ApiProperty({
+    description: 'The hex state for exchanging the token',
+    example: 'cb85f0214feefbff8c7923cb9790a3f2',
+    minLength: 1,
+    maxLength: 35,
+    type: String,
+  })
+  @IsString()
+  @Length(1, 32)
+  public state: string;
 }

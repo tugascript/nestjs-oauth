@@ -121,7 +121,7 @@ describe('Oauth2Service', () => {
     const name = faker.name.fullName();
 
     it('should create a new user', async () => {
-      const [accessToken, refreshToken] = await oauth2Service.login(
+      const [accessToken, refreshToken] = await oauth2Service.callback(
         OAuthProvidersEnum.GOOGLE,
         email,
         name,
@@ -144,7 +144,7 @@ describe('Oauth2Service', () => {
     });
 
     it('should login an existing user', async () => {
-      const [accessToken, refreshToken] = await oauth2Service.login(
+      const [accessToken, refreshToken] = await oauth2Service.callback(
         OAuthProvidersEnum.MICROSOFT,
         email,
         name,

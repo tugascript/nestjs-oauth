@@ -16,20 +16,30 @@
 */
 
 import {
+  Body,
   Controller,
   Get,
   HttpStatus,
+  Post,
   Query,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ApiNotFoundResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiNotFoundResponse,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { FastifyReply } from 'fastify';
+import { URLSearchParams } from 'url';
 import { Public } from '../auth/decorators/public.decorator';
 import { FastifyThrottlerGuard } from '../auth/guards/fastify-throttler.guard';
+import { AuthResponseMapper } from '../auth/mappers/auth-response.mapper';
 import { OAuthProvidersEnum } from '../users/enums/oauth-providers.enum';
 import { CallbackQueryDto } from './dtos/callback-query.dto';
+import { TokenDto } from './dtos/token.dto';
 import { OAuthFlagGuard } from './guards/oauth-flag.guard';
 import {
   IFacebookUser,
@@ -90,7 +100,7 @@ export class Oauth2Controller {
     const provider = OAuthProvidersEnum.MICROSOFT;
     const { displayName, mail } =
       await this.oauth2Service.getUserData<IMicrosoftUser>(provider, cbQuery);
-    return this.loginAndRedirect(res, provider, mail, displayName);
+    return this.callbackAndRedirect(res, provider, mail, displayName);
   }
 
   @Public()
@@ -126,7 +136,7 @@ export class Oauth2Controller {
       provider,
       cbQuery,
     );
-    return this.loginAndRedirect(res, provider, email, name);
+    return this.callbackAndRedirect(res, provider, email, name);
   }
 
   @Public()
@@ -162,7 +172,7 @@ export class Oauth2Controller {
       provider,
       cbQuery,
     );
-    return this.loginAndRedirect(res, provider, email, name);
+    return this.callbackAndRedirect(res, provider, email, name);
   }
 
   @Public()
@@ -184,7 +194,7 @@ export class Oauth2Controller {
   @Get('github/callback')
   @ApiResponse({
     description: 'Redirects to the frontend with the JWT token',
-    status: HttpStatus.PERMANENT_REDIRECT,
+    status: HttpStatus.ACCEPTED,
   })
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for GitHub',
@@ -198,7 +208,33 @@ export class Oauth2Controller {
       provider,
       cbQuery,
     );
-    return this.loginAndRedirect(res, provider, email, name);
+    return this.callbackAndRedirect(res, provider, email, name);
+  }
+
+  @Public()
+  @Post('token')
+  @ApiResponse({
+    description: "Returns the user's OAuth 2 response",
+    status: HttpStatus.OK,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Code or state is invalid',
+  })
+  public async token(
+    @Body() tokenDto: TokenDto,
+    @Res() res: FastifyReply,
+  ): Promise<void> {
+    const result = await this.oauth2Service.token(tokenDto);
+    return res
+      .cookie(this.cookieName, result.refreshToken, {
+        secure: !this.testing,
+        httpOnly: true,
+        signed: true,
+        path: this.cookiePath,
+        expires: new Date(Date.now() + this.refreshTime * 1000),
+      })
+      .header('Content-Type', 'application/json')
+      .send(AuthResponseMapper.map(result));
   }
 
   private async startRedirect(
@@ -210,26 +246,20 @@ export class Oauth2Controller {
       .redirect(await this.oauth2Service.getAuthorizationUrl(provider));
   }
 
-  private async loginAndRedirect(
+  private async callbackAndRedirect(
     res: FastifyReply,
     provider: OAuthProvidersEnum,
     email: string,
     name: string,
   ): Promise<FastifyReply> {
-    const [accessToken, refreshToken] = await this.oauth2Service.login(
+    const [code, state] = await this.oauth2Service.callback(
       provider,
       email,
       name,
     );
+    const urlParams = new URLSearchParams({ code, state });
     return res
-      .cookie(this.cookieName, refreshToken, {
-        secure: !this.testing,
-        httpOnly: true,
-        signed: true,
-        path: this.cookiePath,
-        expires: new Date(Date.now() + this.refreshTime * 1000),
-      })
-      .status(HttpStatus.PERMANENT_REDIRECT)
-      .redirect(`${this.url}/?access_token=${accessToken}`);
+      .status(HttpStatus.ACCEPTED)
+      .redirect(`${this.url}/?${urlParams.toString()}`);
   }
 }
