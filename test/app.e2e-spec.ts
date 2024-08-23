@@ -72,7 +72,7 @@ describe('AppController (e2e)', () => {
     await app.getHttpAdapter().getInstance().ready();
   });
 
-  const name = faker.name.firstName();
+  const name = faker.person.firstName();
   const email = faker.internet.email().toLowerCase();
   const password = faker.internet.password(10) + 'A1!';
   const mockUser = {
@@ -282,7 +282,7 @@ describe('AppController (e2e)', () => {
       });
 
       it('should throw 401 error if user is not confirmed', async () => {
-        const newName = faker.name.firstName();
+        const newName = faker.person.firstName();
         await usersService.create(
           OAuthProvidersEnum.LOCAL,
           newEmail,
@@ -350,7 +350,7 @@ describe('AppController (e2e)', () => {
           .expect(HttpStatus.UNAUTHORIZED);
       });
 
-      it('should logout the user', async () => {
+      it('should logout the user with cookie', async () => {
         const signInRes = await request(app.getHttpServer())
           .post(`${baseUrl}/sign-in`)
           .send({
@@ -363,6 +363,17 @@ describe('AppController (e2e)', () => {
           .post(logoutUrl)
           .set('Authorization', `Bearer ${signInRes.body.accessToken}`)
           .set('Cookie', signInRes.header['set-cookie'])
+          .expect(HttpStatus.OK);
+      });
+
+      it('should logout the user with refresh bodie', async () => {
+        const user = await usersService.findOneByEmail(email);
+        const [accessToken, refreshToken] =
+          await jwtService.generateAuthTokens(user);
+        return request(app.getHttpServer())
+          .post(logoutUrl)
+          .set('Authorization', `Bearer ${accessToken}`)
+          .send({ refreshToken })
           .expect(HttpStatus.OK);
       });
     });
@@ -711,7 +722,7 @@ describe('AppController (e2e)', () => {
       });
 
       it('update name', async () => {
-        const newName = faker.name.firstName();
+        const newName = faker.person.firstName();
         const response = await request(app.getHttpServer())
           .patch(baseUrl)
           .set('Authorization', `Bearer ${signInRes.body.accessToken}`)
@@ -732,7 +743,7 @@ describe('AppController (e2e)', () => {
 
       it('update username', async () => {
         const newUsername = commonService.generatePointSlug(
-          faker.name.firstName(),
+          faker.person.firstName(),
         );
         const response = await request(app.getHttpServer())
           .patch(baseUrl)

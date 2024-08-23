@@ -50,6 +50,13 @@ export class AuthResponseMapper implements IAuthResponse {
   })
   public readonly tokenType: string;
 
+  @ApiProperty({
+    description: 'Expiration period in seconds',
+    example: 3600,
+    type: Number,
+  })
+  public readonly expiresIn: number;
+
   constructor(values: IAuthResponse) {
     Object.assign(this, values);
   }
@@ -60,6 +67,7 @@ export class AuthResponseMapper implements IAuthResponse {
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
       tokenType: 'Bearer',
+      expiresIn: result.expiresIn,
     });
   }
 }

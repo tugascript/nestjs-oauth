@@ -88,7 +88,12 @@ export class AuthService {
     const user = await this.usersService.confirmEmail(id, version);
     const [accessToken, refreshToken] =
       await this.jwtService.generateAuthTokens(user, domain);
-    return { user, accessToken, refreshToken };
+    return {
+      user,
+      accessToken,
+      refreshToken,
+      expiresIn: this.jwtService.accessTime,
+    };
   }
 
   public async signIn(dto: SignInDto, domain?: string): Promise<IAuthResult> {
@@ -112,7 +117,12 @@ export class AuthService {
 
     const [accessToken, refreshToken] =
       await this.jwtService.generateAuthTokens(user, domain);
-    return { user, accessToken, refreshToken };
+    return {
+      user,
+      accessToken,
+      refreshToken,
+      expiresIn: this.jwtService.accessTime,
+    };
   }
 
   public async refreshTokenAccess(
@@ -128,7 +138,12 @@ export class AuthService {
     const user = await this.usersService.findOneByCredentials(id, version);
     const [accessToken, newRefreshToken] =
       await this.jwtService.generateAuthTokens(user, domain, tokenId);
-    return { user, accessToken, refreshToken: newRefreshToken };
+    return {
+      user,
+      accessToken,
+      refreshToken: newRefreshToken,
+      expiresIn: this.jwtService.accessTime,
+    };
   }
 
   public async logout(refreshToken: string): Promise<IMessage> {
@@ -184,7 +199,12 @@ export class AuthService {
     );
     const [accessToken, refreshToken] =
       await this.jwtService.generateAuthTokens(user, domain);
-    return { user, accessToken, refreshToken };
+    return {
+      user,
+      accessToken,
+      refreshToken,
+      expiresIn: this.jwtService.accessTime,
+    };
   }
 
   private async checkLastPassword(

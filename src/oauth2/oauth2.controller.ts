@@ -33,7 +33,6 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { FastifyReply } from 'fastify';
-import { URLSearchParams } from 'url';
 import { Public } from '../auth/decorators/public.decorator';
 import { FastifyThrottlerGuard } from '../auth/guards/fastify-throttler.guard';
 import { AuthResponseMapper } from '../auth/mappers/auth-response.mapper';
@@ -88,7 +87,7 @@ export class Oauth2Controller {
   @Get('microsoft/callback')
   @ApiResponse({
     description: 'Redirects to the frontend with the JWT token',
-    status: HttpStatus.PERMANENT_REDIRECT,
+    status: HttpStatus.ACCEPTED,
   })
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for Microsoft',
@@ -122,7 +121,7 @@ export class Oauth2Controller {
   @Get('google/callback')
   @ApiResponse({
     description: 'Redirects to the frontend with the JWT token',
-    status: HttpStatus.PERMANENT_REDIRECT,
+    status: HttpStatus.ACCEPTED,
   })
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for Google',
@@ -158,7 +157,7 @@ export class Oauth2Controller {
   @Get('facebook/callback')
   @ApiResponse({
     description: 'Redirects to the frontend with the JWT token',
-    status: HttpStatus.PERMANENT_REDIRECT,
+    status: HttpStatus.ACCEPTED,
   })
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for Facebook',
@@ -224,7 +223,7 @@ export class Oauth2Controller {
     @Body() tokenDto: TokenDto,
     @Res() res: FastifyReply,
   ): Promise<void> {
-    const result = await this.oauth2Service.token(tokenDto);
+    const result = await this.oauth2Service.token(tokenDto.code);
     return res
       .cookie(this.cookieName, result.refreshToken, {
         secure: !this.testing,
@@ -234,6 +233,7 @@ export class Oauth2Controller {
         expires: new Date(Date.now() + this.refreshTime * 1000),
       })
       .header('Content-Type', 'application/json')
+      .status(HttpStatus.OK)
       .send(AuthResponseMapper.map(result));
   }
 
@@ -252,14 +252,9 @@ export class Oauth2Controller {
     email: string,
     name: string,
   ): Promise<FastifyReply> {
-    const [code, state] = await this.oauth2Service.callback(
-      provider,
-      email,
-      name,
-    );
-    const urlParams = new URLSearchParams({ code, state });
+    const code = await this.oauth2Service.callback(provider, email, name);
     return res
       .status(HttpStatus.ACCEPTED)
-      .redirect(`${this.url}/?${urlParams.toString()}`);
+      .redirect(`${this.url}/callback?code=${code}`);
   }
 }

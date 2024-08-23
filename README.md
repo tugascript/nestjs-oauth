@@ -4,7 +4,7 @@
 
 This is the source code for the
 tutorial [Nest Authentication with OAuth2.0](https://dev.to/tugascript/nestjs-authentication-with-oauth20-adding-external-providers-2kj).
-This is the 5<sup>th</sup> and last part on a 5 part series, where we will build a production level NestJS OAuth2
+This is the 6<sup>th</sup> and extra part on a 5 part series, where we will build a production level NestJS OAuth2
 service.
 
 ### Contents

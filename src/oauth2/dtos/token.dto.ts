@@ -29,15 +29,4 @@ export abstract class TokenDto {
   @IsString()
   @Length(1, 22)
   public code: string;
-
-  @ApiProperty({
-    description: 'The hex state for exchanging the token',
-    example: 'cb85f0214feefbff8c7923cb9790a3f2',
-    minLength: 1,
-    maxLength: 35,
-    type: String,
-  })
-  @IsString()
-  @Length(1, 32)
-  public state: string;
 }

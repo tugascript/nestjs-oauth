@@ -18,6 +18,7 @@
 import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
+  HttpStatus,
   Inject,
   Injectable,
   NotFoundException,
@@ -26,7 +27,6 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { AxiosError } from 'axios';
 import { Cache } from 'cache-manager';
-import { randomBytes } from 'crypto';
 import { catchError, firstValueFrom } from 'rxjs';
 import { v4 } from 'uuid';
 import { IAuthResult } from '../auth/interfaces/auth-result.interface';
@@ -36,7 +36,6 @@ import { JwtService } from '../jwt/jwt.service';
 import { OAuthProvidersEnum } from '../users/enums/oauth-providers.enum';
 import { UsersService } from '../users/users.service';
 import { OAuthClass } from './classes/oauth.class';
-import { TokenDto } from './dtos/token.dto';
 import { ICallbackQuery } from './interfaces/callback-query.interface';
 import { IClient } from './interfaces/client.interface';
 
@@ -128,7 +127,7 @@ export class Oauth2Service {
       this.cacheManager.set(
         Oauth2Service.getOAuthStateKey(state),
         provider,
-        120 * 1000,
+        120_000,
       ),
     );
     return url;
@@ -140,11 +139,11 @@ export class Oauth2Service {
   ): Promise<T> {
     const { code, state } = cbQuery;
     const accessToken = await this.getAccessToken(provider, code, state);
-    const userData = await firstValueFrom(
+    const userReq = await firstValueFrom(
       this.httpService
         .get<T>(this.getOAuth(provider).dataUrl, {
           headers: {
-            'Content-Type': 'application/json',
+            Accept: 'application/json',
             Authorization: `Bearer ${accessToken}`,
           },
         })
@@ -154,14 +153,19 @@ export class Oauth2Service {
           }),
         ),
     );
-    return userData.data;
+
+    if (userReq.status !== HttpStatus.OK) {
+      throw new UnauthorizedException();
+    }
+
+    return userReq.data;
   }
 
   public async callback(
     provider: OAuthProvidersEnum,
     email: string,
     name: string,
-  ): Promise<[string, string]> {
+  ): Promise<string> {
     const user = await this.usersService.findOrCreate(provider, email, name);
 
     const code = Oauth2Service.generateCode();
@@ -169,45 +173,34 @@ export class Oauth2Service {
       this.cacheManager.set(
         Oauth2Service.getOAuthCodeKey(code),
         user.email,
-        120 * 1000,
+        120_000,
       ),
     );
 
-    const state = randomBytes(16).toString('hex');
-    await this.commonService.throwInternalError(
-      this.cacheManager.set(
-        Oauth2Service.getOAuthStateKey(state),
-        OAuthProvidersEnum.LOCAL,
-        120 * 1000,
-      ),
-    );
-
-    return [code, state];
+    return code;
   }
 
-  public async token(dto: TokenDto): Promise<IAuthResult> {
+  public async token(code: string): Promise<IAuthResult> {
+    const codeKey = Oauth2Service.getOAuthCodeKey(code);
     const email = await this.commonService.throwInternalError(
-      this.cacheManager.get<string>(Oauth2Service.getOAuthCodeKey(dto.code)),
+      this.cacheManager.get<string>(codeKey),
     );
 
     if (!email) {
       throw new UnauthorizedException('Code is invalid or expired');
     }
 
-    const provider = await this.commonService.throwInternalError(
-      this.cacheManager.get<OAuthProvidersEnum>(
-        Oauth2Service.getOAuthStateKey(dto.state),
-      ),
-    );
-
-    if (!provider || provider !== OAuthProvidersEnum.LOCAL) {
-      throw new UnauthorizedException('Corrupted state');
-    }
+    await this.commonService.throwInternalError(this.cacheManager.del(codeKey));
 
     const user = await this.usersService.findOneByEmail(email);
     const [accessToken, refreshToken] =
       await this.jwtService.generateAuthTokens(user);
-    return { user, accessToken, refreshToken };
+    return {
+      user,
+      accessToken,
+      refreshToken,
+      expiresIn: this.jwtService.accessTime,
+    };
   }
 
   private getOAuth(provider: OAuthProvidersEnum): OAuthClass {
@@ -234,6 +227,8 @@ export class Oauth2Service {
       throw new UnauthorizedException('Corrupted state');
     }
 
-    return await this.commonService.throwInternalError(oauth.getToken(code));
+    return await this.commonService.throwUnauthorizedError(
+      oauth.getToken(code),
+    );
   }
 }
