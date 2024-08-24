@@ -38,6 +38,8 @@ import { UsersService } from '../users/users.service';
 import { OAuthClass } from './classes/oauth.class';
 import { ICallbackQuery } from './interfaces/callback-query.interface';
 import { IClient } from './interfaces/client.interface';
+import { TokenTypeEnum } from '../jwt/enums/token-type.enum';
+import { ICallbackResult } from './interfaces/callback-result.interface';
 
 @Injectable()
 export class Oauth2Service {
@@ -165,7 +167,7 @@ export class Oauth2Service {
     provider: OAuthProvidersEnum,
     email: string,
     name: string,
-  ): Promise<string> {
+  ): Promise<ICallbackResult> {
     const user = await this.usersService.findOrCreate(provider, email, name);
 
     const code = Oauth2Service.generateCode();
@@ -177,22 +179,34 @@ export class Oauth2Service {
       ),
     );
 
-    return code;
+    const accessToken = await this.jwtService.generateToken(
+      user,
+      TokenTypeEnum.ACCESS,
+    );
+    return {
+      code,
+      accessToken,
+      expiresIn: this.jwtService.accessTime,
+    };
   }
 
-  public async token(code: string): Promise<IAuthResult> {
+  public async token(code: string, userId: number): Promise<IAuthResult> {
     const codeKey = Oauth2Service.getOAuthCodeKey(code);
     const email = await this.commonService.throwInternalError(
       this.cacheManager.get<string>(codeKey),
     );
 
     if (!email) {
-      throw new UnauthorizedException('Code is invalid or expired');
+      throw new UnauthorizedException();
     }
 
     await this.commonService.throwInternalError(this.cacheManager.del(codeKey));
-
     const user = await this.usersService.findOneByEmail(email);
+
+    if (user.id !== userId) {
+      throw new UnauthorizedException();
+    }
+
     const [accessToken, refreshToken] =
       await this.jwtService.generateAuthTokens(user);
     return {

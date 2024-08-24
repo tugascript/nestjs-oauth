@@ -366,7 +366,7 @@ describe('AppController (e2e)', () => {
           .expect(HttpStatus.OK);
       });
 
-      it('should logout the user with refresh bodie', async () => {
+      it('should logout the user with refresh body', async () => {
         const user = await usersService.findOneByEmail(email);
         const [accessToken, refreshToken] =
           await jwtService.generateAuthTokens(user);
@@ -552,6 +552,75 @@ describe('AppController (e2e)', () => {
           user: expect.any(Object),
           accessToken: expect.any(String),
         });
+      });
+    });
+
+    describe('refresh-access', () => {
+      const refreshPath = `${baseUrl}/refresh-access`;
+
+      it('should return 200 OK with auth response with the refresh token in the cookies', async () => {
+        const signInRes = await request(app.getHttpServer())
+          .post(`${baseUrl}/sign-in`)
+          .send({
+            emailOrUsername: email,
+            password,
+          })
+          .expect(HttpStatus.OK);
+
+        return request(app.getHttpServer())
+          .post(refreshPath)
+          .set('Authorization', `Bearer ${signInRes.body.accessToken}`)
+          .set('Cookie', signInRes.header['set-cookie'])
+          .expect(HttpStatus.OK)
+          .expect((res) => {
+            expect(res.body).toMatchObject({
+              accessToken: expect.any(String),
+              refreshToken: expect.any(String),
+              expiresIn: expect.any(Number),
+              tokenType: 'Bearer',
+              user: {
+                id: expect.any(Number),
+                name: commonService.formatName(name),
+                username: commonService.generatePointSlug(name),
+                email,
+              },
+            });
+          });
+      });
+
+      it('should return 200 OK with auth response with the refresh token in the body', async () => {
+        const user = await usersService.findOneByEmail(email);
+        const [accessToken, refreshToken] =
+          await jwtService.generateAuthTokens(user);
+        return request(app.getHttpServer())
+          .post(refreshPath)
+          .set('Authorization', `Bearer ${accessToken}`)
+          .send({ refreshToken })
+          .expect(HttpStatus.OK)
+          .expect((res) => {
+            expect(res.body).toMatchObject({
+              accessToken: expect.any(String),
+              refreshToken: expect.any(String),
+              expiresIn: expect.any(Number),
+              tokenType: 'Bearer',
+              user: {
+                id: expect.any(Number),
+                name: commonService.formatName(name),
+                username: commonService.generatePointSlug(name),
+                email,
+              },
+            });
+          });
+      });
+
+      it('should return 401 UNAUTHORIZED when refresh token is not passed', async () => {
+        const user = await usersService.findOneByEmail(email);
+        const [accessToken] = await jwtService.generateAuthTokens(user);
+
+        return request(app.getHttpServer())
+          .post(refreshPath)
+          .set('Authorization', `Bearer ${accessToken}`)
+          .expect(HttpStatus.UNAUTHORIZED);
       });
     });
   });

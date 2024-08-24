@@ -23,6 +23,7 @@ import {
   Post,
   Query,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -47,6 +48,7 @@ import {
   IMicrosoftUser,
 } from './interfaces/user-response.interface';
 import { Oauth2Service } from './oauth2.service';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('Oauth2')
 @Controller('api/auth/ext')
@@ -210,7 +212,6 @@ export class Oauth2Controller {
     return this.callbackAndRedirect(res, provider, email, name);
   }
 
-  @Public()
   @Post('token')
   @ApiResponse({
     description: "Returns the user's OAuth 2 response",
@@ -220,10 +221,15 @@ export class Oauth2Controller {
     description: 'Code or state is invalid',
   })
   public async token(
+    @CurrentUser() userId: number,
     @Body() tokenDto: TokenDto,
     @Res() res: FastifyReply,
   ): Promise<void> {
-    const result = await this.oauth2Service.token(tokenDto.code);
+    if (tokenDto.redirectUri !== this.url + '/auth/callback') {
+      throw new UnauthorizedException();
+    }
+
+    const result = await this.oauth2Service.token(tokenDto.code, userId);
     return res
       .cookie(this.cookieName, result.refreshToken, {
         secure: !this.testing,
@@ -252,9 +258,20 @@ export class Oauth2Controller {
     email: string,
     name: string,
   ): Promise<FastifyReply> {
-    const code = await this.oauth2Service.callback(provider, email, name);
+    const { code, accessToken, expiresIn } = await this.oauth2Service.callback(
+      provider,
+      email,
+      name,
+    );
+    const urlSearchParams = new URLSearchParams({
+      code,
+      accessToken,
+      tokenType: 'Bearer',
+      expiresIn: expiresIn.toString(),
+    });
+
     return res
       .status(HttpStatus.ACCEPTED)
-      .redirect(`${this.url}/callback?code=${code}`);
+      .redirect(`${this.url}/auth/callback?${urlSearchParams.toString()}`);
   }
 }

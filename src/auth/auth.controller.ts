@@ -163,8 +163,9 @@ export class AuthController {
   public async logout(
     @Req() req: FastifyRequest,
     @Res() res: FastifyReply,
+    @Body() refreshAccessDto?: RefreshAccessDto,
   ): Promise<void> {
-    const token = this.refreshTokenFromReq(req);
+    const token = this.refreshTokenFromReq(req, refreshAccessDto);
     const message = await this.authService.logout(token);
     res
       .clearCookie(this.cookieName, { path: this.cookiePath })

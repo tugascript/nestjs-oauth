@@ -34,6 +34,7 @@ import { OAuthProvidersEnum } from '../../users/enums/oauth-providers.enum';
 import { UsersModule } from '../../users/users.module';
 import { UsersService } from '../../users/users.service';
 import { Oauth2Service } from '../oauth2.service';
+import { isJWT } from 'class-validator';
 
 describe('Oauth2Service', () => {
   let module: TestingModule,
@@ -121,14 +122,19 @@ describe('Oauth2Service', () => {
     it('should create a new user', async () => {
       const email = faker.internet.email();
       const name = faker.person.fullName();
-      const code = await oauth2Service.callback(
+      const result = await oauth2Service.callback(
         OAuthProvidersEnum.GOOGLE,
         email,
         name,
       );
 
-      expect(code).toBeDefined();
-      expect(code.length).toBe(22);
+      expect(result).toMatchObject({
+        accessToken: expect.any(String),
+        code: expect.any(String),
+        expiresIn: expect.any(Number),
+      });
+      expect(isJWT(result.accessToken)).toBe(true);
+      expect(result.code).toHaveLength(22);
 
       const user = await usersService.findOneByEmail(email);
       expect(user).toBeDefined();
@@ -144,14 +150,19 @@ describe('Oauth2Service', () => {
       const email = faker.internet.email();
       const name = faker.person.fullName();
       await usersService.create(OAuthProvidersEnum.GOOGLE, email, name);
-      const code = await oauth2Service.callback(
+      const result = await oauth2Service.callback(
         OAuthProvidersEnum.MICROSOFT,
         email,
         name,
       );
 
-      expect(code).toBeDefined();
-      expect(code.length).toBe(22);
+      expect(result).toMatchObject({
+        accessToken: expect.any(String),
+        code: expect.any(String),
+        expiresIn: expect.any(Number),
+      });
+      expect(isJWT(result.accessToken)).toBe(true);
+      expect(result.code).toHaveLength(22);
 
       const user = await usersService.findOneByEmail(email);
       expect(user).toBeDefined();
@@ -166,15 +177,16 @@ describe('Oauth2Service', () => {
 
   describe('token', () => {
     it('should return access and refresh tokens from callback code', async () => {
-      const email = faker.internet.email();
+      const email = faker.internet.email().toLowerCase();
       const name = faker.person.fullName();
-      const code = await oauth2Service.callback(
-        OAuthProvidersEnum.MICROSOFT,
+      const { code } = await oauth2Service.callback(
+        OAuthProvidersEnum.GOOGLE,
         email,
         name,
       );
+      const user = await usersService.findOneByEmail(email);
 
-      const result = await oauth2Service.token(code);
+      const result = await oauth2Service.token(code, user.id);
 
       expect(result).toMatchObject({
         user: expect.any(UserEntity),
@@ -184,11 +196,14 @@ describe('Oauth2Service', () => {
     });
 
     it('should throw an unauthorized exception for invalid callback code', async () => {
-      const code = '7IHq0AGB7FOL25kt8WejRz';
+      const email = faker.internet.email().toLowerCase();
+      const name = faker.person.fullName();
+      await oauth2Service.callback(OAuthProvidersEnum.MICROSOFT, email, name);
+      const user = await usersService.findOneByEmail(email);
 
-      await expect(oauth2Service.token(code)).rejects.toThrow(
-        new UnauthorizedException('Code is invalid or expired'),
-      );
+      await expect(
+        oauth2Service.token('7IHq0AGB7FOL25kt8WejRz', user.id),
+      ).rejects.toThrow(new UnauthorizedException());
     });
   });
 

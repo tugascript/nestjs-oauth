@@ -32,6 +32,7 @@ import { Oauth2Service } from '../src/oauth2/oauth2.service';
 import nock from 'nock';
 import { faker } from '@faker-js/faker';
 import { CommonService } from '../src/common/common.service';
+import { isJWT } from 'class-validator';
 
 const URLS = {
   [OAuthProvidersEnum.MICROSOFT]: {
@@ -127,7 +128,7 @@ describe('OAuth2 (e2e)', () => {
       const email = faker.internet.email().toLowerCase();
 
       it('should return 202 accepted and redirect with code', async () => {
-        const frontendUrl = `https://${configService.get<string>('domain')}/callback?code=`;
+        const frontendUrl = `https://${configService.get<string>('domain')}/auth/callback`;
         await cacheManager.set(`oauth_state:${state}`, provider, 120_000);
         const tokenScope = nock(host, {
           reqheaders: {
@@ -173,7 +174,14 @@ describe('OAuth2 (e2e)', () => {
           .expect(HttpStatus.ACCEPTED)
           .expect((res) => {
             expect(res.headers.location.startsWith(frontendUrl)).toBe(true);
-            expect(res.headers.location.split('?code=')[1].length).toBe(22);
+
+            const queryParams = res.headers.location.split('?')[1];
+            const searchParams = new URLSearchParams(queryParams);
+
+            expect(searchParams.get('code')).toHaveLength(22);
+            expect(isJWT(searchParams.get('accessToken'))).toBe(true);
+            expect(searchParams.get('tokenType')).toBe('Bearer');
+            expect(searchParams.has('expiresIn')).toBe(true);
           });
 
         expect(tokenScope.isDone()).toBe(true);
@@ -235,11 +243,18 @@ describe('OAuth2 (e2e)', () => {
       const email = faker.internet.email().toLowerCase();
 
       it('should return 200 OK with access and refresh token', async () => {
-        const code = await oauth2Service.callback(provider, email, name);
+        const redirectUri = `https://${configService.get<string>('domain')}/auth/callback`;
+        const { accessToken, code } = await oauth2Service.callback(
+          provider,
+          email,
+          name,
+        );
 
         return request(app.getHttpServer())
           .post(tokenPath)
-          .send({ code })
+          .set('Authorization', `Bearer ${accessToken}`)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send(new URLSearchParams({ code, redirectUri }).toString())
           .expect(HttpStatus.OK)
           .expect((res) => {
             expect(res.body).toMatchObject({
@@ -258,12 +273,46 @@ describe('OAuth2 (e2e)', () => {
       });
 
       it('should return 401 UNAUTHORIZED when the code is expired', async () => {
-        const code = await oauth2Service.callback(provider, email, name);
+        const redirectUri = `https://${configService.get<string>('domain')}/auth/callback`;
+        const { accessToken, code } = await oauth2Service.callback(
+          provider,
+          email,
+          name,
+        );
         await cacheManager.del(`oauth_code:${code}`);
 
         return request(app.getHttpServer())
           .post(tokenPath)
-          .send({ code })
+          .set('Authorization', `Bearer ${accessToken}`)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send(new URLSearchParams({ code, redirectUri }).toString())
+          .expect(HttpStatus.UNAUTHORIZED);
+      });
+
+      it('should return 401 UNAUTHORIZED when the user is not authenticated', async () => {
+        const redirectUri = `https://${configService.get<string>('domain')}/auth/callback`;
+        const { code } = await oauth2Service.callback(provider, email, name);
+
+        return request(app.getHttpServer())
+          .post(tokenPath)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send(new URLSearchParams({ code, redirectUri }).toString())
+          .expect(HttpStatus.UNAUTHORIZED);
+      });
+
+      it('should return 401 UNAUTHORIZED when the redirectUri is wrong', async () => {
+        const redirectUri = `https://not-the-correct-url.com/auth/callback`;
+        const { accessToken, code } = await oauth2Service.callback(
+          provider,
+          email,
+          name,
+        );
+
+        return request(app.getHttpServer())
+          .post(tokenPath)
+          .set('Authorization', `Bearer ${accessToken}`)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send(new URLSearchParams({ code, redirectUri }).toString())
           .expect(HttpStatus.UNAUTHORIZED);
       });
     });
