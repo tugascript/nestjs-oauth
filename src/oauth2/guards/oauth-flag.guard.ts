@@ -18,6 +18,7 @@
 import {
   CanActivate,
   ExecutionContext,
+  Injectable,
   mixin,
   NotFoundException,
   Type,
@@ -31,6 +32,7 @@ import { IClient } from '../interfaces/client.interface';
 export const OAuthFlagGuard = (
   provider: OAuthProvidersEnum,
 ): Type<CanActivate> => {
+  @Injectable()
   class OAuthFlagGuardClass implements CanActivate {
     constructor(private readonly configService: ConfigService) {}
 
