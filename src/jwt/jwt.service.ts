@@ -52,6 +52,10 @@ export class JwtService {
     this.domain = this.configService.get<string>('domain');
   }
 
+  public get accessTime(): number {
+    return this.jwtConfig.access.time;
+  }
+
   private static async generateTokenAsync(
     payload: IAccessPayload | IEmailPayload | IRefreshPayload,
     secret: string,

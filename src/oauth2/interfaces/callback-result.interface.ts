@@ -15,12 +15,8 @@
  along with Nest OAuth.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { IAuthResponseUser } from './auth-response-user.interface';
-
-export interface IAuthResponse {
-  user: IAuthResponseUser;
-  accessToken: string;
-  refreshToken: string;
-  tokenType: string;
-  expiresIn: number;
+export interface ICallbackResult {
+  readonly code: string;
+  readonly accessToken: string;
+  readonly expiresIn: number;
 }

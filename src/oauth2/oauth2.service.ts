@@ -16,7 +16,9 @@
 */
 
 import { HttpService } from '@nestjs/axios';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
+  HttpStatus,
   Inject,
   Injectable,
   NotFoundException,
@@ -24,7 +26,10 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AxiosError } from 'axios';
+import { Cache } from 'cache-manager';
 import { catchError, firstValueFrom } from 'rxjs';
+import { v4 } from 'uuid';
+import { IAuthResult } from '../auth/interfaces/auth-result.interface';
 import { CommonService } from '../common/common.service';
 import { isNull } from '../common/utils/validation.util';
 import { JwtService } from '../jwt/jwt.service';
@@ -33,11 +38,15 @@ import { UsersService } from '../users/users.service';
 import { OAuthClass } from './classes/oauth.class';
 import { ICallbackQuery } from './interfaces/callback-query.interface';
 import { IClient } from './interfaces/client.interface';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import { TokenTypeEnum } from '../jwt/enums/token-type.enum';
+import { ICallbackResult } from './interfaces/callback-result.interface';
 
 @Injectable()
 export class Oauth2Service {
+  private static readonly BASE62 =
+    '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  private static readonly BIG62 = BigInt(Oauth2Service.BASE62.length);
+
   private readonly [OAuthProvidersEnum.MICROSOFT]: OAuthClass | null;
   private readonly [OAuthProvidersEnum.GOOGLE]: OAuthClass | null;
   private readonly [OAuthProvidersEnum.FACEBOOK]: OAuthClass | null;
@@ -91,12 +100,37 @@ export class Oauth2Service {
     return new OAuthClass(provider, client, url);
   }
 
+  private static getOAuthStateKey(state: string): string {
+    return `oauth_state:${state}`;
+  }
+
+  private static getOAuthCodeKey(code: string): string {
+    return `oauth_code:${code}`;
+  }
+
+  private static generateCode(): string {
+    let num = BigInt('0x' + v4().replace(/-/g, ''));
+    let code = '';
+
+    while (num > 0) {
+      const remainder = Number(num % Oauth2Service.BIG62);
+      code = Oauth2Service.BASE62[remainder] + code;
+      num = num / Oauth2Service.BIG62;
+    }
+
+    return code.padStart(22, '0');
+  }
+
   public async getAuthorizationUrl(
     provider: OAuthProvidersEnum,
   ): Promise<string> {
     const [url, state] = this.getOAuth(provider).authorizationUrl;
     await this.commonService.throwInternalError(
-      this.cacheManager.set(this.getOAuthStateKey(state), provider, 120 * 1000),
+      this.cacheManager.set(
+        Oauth2Service.getOAuthStateKey(state),
+        provider,
+        120_000,
+      ),
     );
     return url;
   }
@@ -107,11 +141,11 @@ export class Oauth2Service {
   ): Promise<T> {
     const { code, state } = cbQuery;
     const accessToken = await this.getAccessToken(provider, code, state);
-    const userData = await firstValueFrom(
+    const userReq = await firstValueFrom(
       this.httpService
         .get<T>(this.getOAuth(provider).dataUrl, {
           headers: {
-            'Content-Type': 'application/json',
+            Accept: 'application/json',
             Authorization: `Bearer ${accessToken}`,
           },
         })
@@ -121,20 +155,66 @@ export class Oauth2Service {
           }),
         ),
     );
-    return userData.data;
+
+    if (userReq.status !== HttpStatus.OK) {
+      throw new UnauthorizedException();
+    }
+
+    return userReq.data;
   }
 
-  public async login(
+  public async callback(
     provider: OAuthProvidersEnum,
     email: string,
     name: string,
-  ): Promise<[string, string]> {
+  ): Promise<ICallbackResult> {
     const user = await this.usersService.findOrCreate(provider, email, name);
-    return this.jwtService.generateAuthTokens(user);
+
+    const code = Oauth2Service.generateCode();
+    await this.commonService.throwInternalError(
+      this.cacheManager.set(
+        Oauth2Service.getOAuthCodeKey(code),
+        user.email,
+        this.jwtService.accessTime * 1000,
+      ),
+    );
+
+    const accessToken = await this.jwtService.generateToken(
+      user,
+      TokenTypeEnum.ACCESS,
+    );
+    return {
+      code,
+      accessToken,
+      expiresIn: this.jwtService.accessTime,
+    };
   }
 
-  private getOAuthStateKey(state: string): string {
-    return `oauth_state:${state}`;
+  public async token(code: string, userId: number): Promise<IAuthResult> {
+    const codeKey = Oauth2Service.getOAuthCodeKey(code);
+    const email = await this.commonService.throwInternalError(
+      this.cacheManager.get<string>(codeKey),
+    );
+
+    if (!email) {
+      throw new UnauthorizedException();
+    }
+
+    await this.commonService.throwInternalError(this.cacheManager.del(codeKey));
+    const user = await this.usersService.findOneByEmail(email);
+
+    if (user.id !== userId) {
+      throw new UnauthorizedException();
+    }
+
+    const [accessToken, refreshToken] =
+      await this.jwtService.generateAuthTokens(user);
+    return {
+      user,
+      accessToken,
+      refreshToken,
+      expiresIn: this.jwtService.accessTime,
+    };
   }
 
   private getOAuth(provider: OAuthProvidersEnum): OAuthClass {
@@ -154,13 +234,15 @@ export class Oauth2Service {
   ): Promise<string> {
     const oauth = this.getOAuth(provider);
     const stateProvider = await this.cacheManager.get<OAuthProvidersEnum>(
-      this.getOAuthStateKey(state),
+      Oauth2Service.getOAuthStateKey(state),
     );
 
     if (!stateProvider || provider !== stateProvider) {
       throw new UnauthorizedException('Corrupted state');
     }
 
-    return await this.commonService.throwInternalError(oauth.getToken(code));
+    return await this.commonService.throwUnauthorizedError(
+      oauth.getToken(code),
+    );
   }
 }

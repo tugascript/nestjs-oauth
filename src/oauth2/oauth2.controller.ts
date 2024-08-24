@@ -16,20 +16,30 @@
 */
 
 import {
+  Body,
   Controller,
   Get,
   HttpStatus,
+  Post,
   Query,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ApiNotFoundResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiNotFoundResponse,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { FastifyReply } from 'fastify';
 import { Public } from '../auth/decorators/public.decorator';
 import { FastifyThrottlerGuard } from '../auth/guards/fastify-throttler.guard';
+import { AuthResponseMapper } from '../auth/mappers/auth-response.mapper';
 import { OAuthProvidersEnum } from '../users/enums/oauth-providers.enum';
 import { CallbackQueryDto } from './dtos/callback-query.dto';
+import { TokenDto } from './dtos/token.dto';
 import { OAuthFlagGuard } from './guards/oauth-flag.guard';
 import {
   IFacebookUser,
@@ -38,6 +48,7 @@ import {
   IMicrosoftUser,
 } from './interfaces/user-response.interface';
 import { Oauth2Service } from './oauth2.service';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('Oauth2')
 @Controller('api/auth/ext')
@@ -78,7 +89,7 @@ export class Oauth2Controller {
   @Get('microsoft/callback')
   @ApiResponse({
     description: 'Redirects to the frontend with the JWT token',
-    status: HttpStatus.PERMANENT_REDIRECT,
+    status: HttpStatus.ACCEPTED,
   })
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for Microsoft',
@@ -90,7 +101,7 @@ export class Oauth2Controller {
     const provider = OAuthProvidersEnum.MICROSOFT;
     const { displayName, mail } =
       await this.oauth2Service.getUserData<IMicrosoftUser>(provider, cbQuery);
-    return this.loginAndRedirect(res, provider, mail, displayName);
+    return this.callbackAndRedirect(res, provider, mail, displayName);
   }
 
   @Public()
@@ -112,7 +123,7 @@ export class Oauth2Controller {
   @Get('google/callback')
   @ApiResponse({
     description: 'Redirects to the frontend with the JWT token',
-    status: HttpStatus.PERMANENT_REDIRECT,
+    status: HttpStatus.ACCEPTED,
   })
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for Google',
@@ -126,7 +137,7 @@ export class Oauth2Controller {
       provider,
       cbQuery,
     );
-    return this.loginAndRedirect(res, provider, email, name);
+    return this.callbackAndRedirect(res, provider, email, name);
   }
 
   @Public()
@@ -148,7 +159,7 @@ export class Oauth2Controller {
   @Get('facebook/callback')
   @ApiResponse({
     description: 'Redirects to the frontend with the JWT token',
-    status: HttpStatus.PERMANENT_REDIRECT,
+    status: HttpStatus.ACCEPTED,
   })
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for Facebook',
@@ -162,7 +173,7 @@ export class Oauth2Controller {
       provider,
       cbQuery,
     );
-    return this.loginAndRedirect(res, provider, email, name);
+    return this.callbackAndRedirect(res, provider, email, name);
   }
 
   @Public()
@@ -184,7 +195,7 @@ export class Oauth2Controller {
   @Get('github/callback')
   @ApiResponse({
     description: 'Redirects to the frontend with the JWT token',
-    status: HttpStatus.PERMANENT_REDIRECT,
+    status: HttpStatus.ACCEPTED,
   })
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for GitHub',
@@ -198,7 +209,38 @@ export class Oauth2Controller {
       provider,
       cbQuery,
     );
-    return this.loginAndRedirect(res, provider, email, name);
+    return this.callbackAndRedirect(res, provider, email, name);
+  }
+
+  @Post('token')
+  @ApiResponse({
+    description: "Returns the user's OAuth 2 response",
+    status: HttpStatus.OK,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Code or redirectUri is invalid',
+  })
+  public async token(
+    @CurrentUser() userId: number,
+    @Body() tokenDto: TokenDto,
+    @Res() res: FastifyReply,
+  ): Promise<void> {
+    if (tokenDto.redirectUri !== this.url + '/auth/callback') {
+      throw new UnauthorizedException();
+    }
+
+    const result = await this.oauth2Service.token(tokenDto.code, userId);
+    return res
+      .cookie(this.cookieName, result.refreshToken, {
+        secure: !this.testing,
+        httpOnly: true,
+        signed: true,
+        path: this.cookiePath,
+        expires: new Date(Date.now() + this.refreshTime * 1000),
+      })
+      .header('Content-Type', 'application/json')
+      .status(HttpStatus.OK)
+      .send(AuthResponseMapper.map(result));
   }
 
   private async startRedirect(
@@ -210,26 +252,26 @@ export class Oauth2Controller {
       .redirect(await this.oauth2Service.getAuthorizationUrl(provider));
   }
 
-  private async loginAndRedirect(
+  private async callbackAndRedirect(
     res: FastifyReply,
     provider: OAuthProvidersEnum,
     email: string,
     name: string,
   ): Promise<FastifyReply> {
-    const [accessToken, refreshToken] = await this.oauth2Service.login(
+    const { code, accessToken, expiresIn } = await this.oauth2Service.callback(
       provider,
       email,
       name,
     );
+    const urlSearchParams = new URLSearchParams({
+      code,
+      accessToken,
+      tokenType: 'Bearer',
+      expiresIn: expiresIn.toString(),
+    });
+
     return res
-      .cookie(this.cookieName, refreshToken, {
-        secure: !this.testing,
-        httpOnly: true,
-        signed: true,
-        path: this.cookiePath,
-        expires: new Date(Date.now() + this.refreshTime * 1000),
-      })
-      .status(HttpStatus.PERMANENT_REDIRECT)
-      .redirect(`${this.url}/?access_token=${accessToken}`);
+      .status(HttpStatus.ACCEPTED)
+      .redirect(`${this.url}/auth/callback?${urlSearchParams.toString()}`);
   }
 }

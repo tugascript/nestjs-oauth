@@ -24,6 +24,7 @@ import {
   Logger,
   LoggerService,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { validate } from 'class-validator';
 import slugify from 'slugify';
@@ -128,6 +129,20 @@ export class CommonService {
     } catch (error) {
       this.loggerService.error(error);
       throw new InternalServerErrorException(error);
+    }
+  }
+
+  /**
+   * Throw Unauthorized
+   *
+   * Function to abstract throwing unauthorized exceptionm
+   */
+  public async throwUnauthorizedError<T>(promise: Promise<T>): Promise<T> {
+    try {
+      return await promise;
+    } catch (error) {
+      this.loggerService.error(error);
+      throw new UnauthorizedException();
     }
   }
 

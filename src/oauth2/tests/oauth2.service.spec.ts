@@ -20,19 +20,21 @@ import { MikroORM } from '@mikro-orm/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { HttpModule } from '@nestjs/axios';
 import { CacheModule } from '@nestjs/cache-manager';
+import { UnauthorizedException } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import { isJWT } from 'class-validator';
 import { CommonModule } from '../../common/common.module';
 import { CommonService } from '../../common/common.service';
 import { config } from '../../config';
 import { validationSchema } from '../../config/config.schema';
 import { MikroOrmConfig } from '../../config/mikroorm.config';
 import { JwtModule } from '../../jwt/jwt.module';
+import { UserEntity } from '../../users/entities/user.entity';
 import { OAuthProvidersEnum } from '../../users/enums/oauth-providers.enum';
 import { UsersModule } from '../../users/users.module';
 import { UsersService } from '../../users/users.service';
 import { Oauth2Service } from '../oauth2.service';
+import { isJWT } from 'class-validator';
 
 describe('Oauth2Service', () => {
   let module: TestingModule,
@@ -116,26 +118,27 @@ describe('Oauth2Service', () => {
     });
   });
 
-  describe('login', () => {
-    const email = faker.internet.email();
-    const name = faker.name.fullName();
-
+  describe('callback', () => {
     it('should create a new user', async () => {
-      const [accessToken, refreshToken] = await oauth2Service.login(
+      const email = faker.internet.email();
+      const name = faker.person.fullName();
+      const result = await oauth2Service.callback(
         OAuthProvidersEnum.GOOGLE,
         email,
         name,
       );
 
-      expect(accessToken).toBeDefined();
-      expect(refreshToken).toBeDefined();
-      expect(isJWT(accessToken)).toBeTruthy();
-      expect(isJWT(refreshToken)).toBeTruthy();
+      expect(result).toMatchObject({
+        accessToken: expect.any(String),
+        code: expect.any(String),
+        expiresIn: expect.any(Number),
+      });
+      expect(isJWT(result.accessToken)).toBe(true);
+      expect(result.code).toHaveLength(22);
 
       const user = await usersService.findOneByEmail(email);
       expect(user).toBeDefined();
       expect(user.confirmed).toBeTruthy();
-      expect(user.id).toStrictEqual(1);
 
       const providers = await usersService.findOAuthProviders(user.id);
       expect(providers).toBeDefined();
@@ -144,26 +147,63 @@ describe('Oauth2Service', () => {
     });
 
     it('should login an existing user', async () => {
-      const [accessToken, refreshToken] = await oauth2Service.login(
+      const email = faker.internet.email();
+      const name = faker.person.fullName();
+      await usersService.create(OAuthProvidersEnum.GOOGLE, email, name);
+      const result = await oauth2Service.callback(
         OAuthProvidersEnum.MICROSOFT,
         email,
         name,
       );
 
-      expect(accessToken).toBeDefined();
-      expect(refreshToken).toBeDefined();
-      expect(isJWT(accessToken)).toBeTruthy();
-      expect(isJWT(refreshToken)).toBeTruthy();
+      expect(result).toMatchObject({
+        accessToken: expect.any(String),
+        code: expect.any(String),
+        expiresIn: expect.any(Number),
+      });
+      expect(isJWT(result.accessToken)).toBe(true);
+      expect(result.code).toHaveLength(22);
 
       const user = await usersService.findOneByEmail(email);
       expect(user).toBeDefined();
       expect(user.confirmed).toBeTruthy();
-      expect(user.id).toStrictEqual(1);
       const providers = await usersService.findOAuthProviders(user.id);
       expect(providers).toBeDefined();
       expect(providers).toHaveLength(2);
       expect(providers[0].provider).toBe(OAuthProvidersEnum.GOOGLE);
       expect(providers[1].provider).toBe(OAuthProvidersEnum.MICROSOFT);
+    });
+  });
+
+  describe('token', () => {
+    it('should return access and refresh tokens from callback code', async () => {
+      const email = faker.internet.email().toLowerCase();
+      const name = faker.person.fullName();
+      const { code } = await oauth2Service.callback(
+        OAuthProvidersEnum.GOOGLE,
+        email,
+        name,
+      );
+      const user = await usersService.findOneByEmail(email);
+
+      const result = await oauth2Service.token(code, user.id);
+
+      expect(result).toMatchObject({
+        user: expect.any(UserEntity),
+        accessToken: expect.any(String),
+        refreshToken: expect.any(String),
+      });
+    });
+
+    it('should throw an unauthorized exception for invalid callback code', async () => {
+      const email = faker.internet.email().toLowerCase();
+      const name = faker.person.fullName();
+      await oauth2Service.callback(OAuthProvidersEnum.MICROSOFT, email, name);
+      const user = await usersService.findOneByEmail(email);
+
+      await expect(
+        oauth2Service.token('7IHq0AGB7FOL25kt8WejRz', user.id),
+      ).rejects.toThrow(new UnauthorizedException());
     });
   });
 

@@ -21,4 +21,5 @@ export interface IAuthResult {
   user: IUser;
   accessToken: string;
   refreshToken: string;
+  expiresIn: number;
 }
