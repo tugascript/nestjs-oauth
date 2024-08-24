@@ -218,7 +218,7 @@ export class Oauth2Controller {
     status: HttpStatus.OK,
   })
   @ApiUnauthorizedResponse({
-    description: 'Code or state is invalid',
+    description: 'Code or redirectUri is invalid',
   })
   public async token(
     @CurrentUser() userId: number,
