@@ -3627,10 +3627,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dayjs@npm:1.11.12":
-  version: 1.11.12
-  resolution: "dayjs@npm:1.11.12"
-  checksum: 40a4f67c2df3af125ae0ddec68d3a6d806d3009a7414bf45479aaf82f1dd82f3e139e6642e72391abccc37488897830c56afcabb4c819014130d283644df8128
+"dayjs@npm:1.11.13":
+  version: 1.11.13
+  resolution: "dayjs@npm:1.11.13"
+  checksum: f388db88a6aa93956c1f6121644e783391c7b738b73dbc54485578736565c8931bdfba4bb94e9b1535c6e509c97d5deb918bbe1ae6b34358d994de735055cca9
   languageName: node
   linkType: hard
 
@@ -6935,7 +6935,7 @@ __metadata:
     cache-manager-ioredis-yet: 2.1.1
     class-transformer: 0.5.1
     class-validator: 0.14.1
-    dayjs: 1.11.12
+    dayjs: 1.11.13
     eslint: 8.57.0
     eslint-config-prettier: 8.10.0
     eslint-plugin-header: 3.1.1
