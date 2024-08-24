@@ -175,7 +175,7 @@ export class Oauth2Service {
       this.cacheManager.set(
         Oauth2Service.getOAuthCodeKey(code),
         user.email,
-        120_000,
+        this.jwtService.accessTime * 1000,
       ),
     );
 
