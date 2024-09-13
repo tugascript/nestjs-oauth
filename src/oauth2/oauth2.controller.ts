@@ -89,7 +89,7 @@ export class Oauth2Controller {
   @Get('microsoft/callback')
   @ApiResponse({
     description: 'Redirects to the frontend with the JWT token',
-    status: HttpStatus.ACCEPTED,
+    status: HttpStatus.FOUND,
   })
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for Microsoft',
@@ -123,7 +123,7 @@ export class Oauth2Controller {
   @Get('google/callback')
   @ApiResponse({
     description: 'Redirects to the frontend with the JWT token',
-    status: HttpStatus.ACCEPTED,
+    status: HttpStatus.FOUND,
   })
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for Google',
@@ -159,7 +159,7 @@ export class Oauth2Controller {
   @Get('facebook/callback')
   @ApiResponse({
     description: 'Redirects to the frontend with the JWT token',
-    status: HttpStatus.ACCEPTED,
+    status: HttpStatus.FOUND,
   })
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for Facebook',
@@ -195,7 +195,7 @@ export class Oauth2Controller {
   @Get('github/callback')
   @ApiResponse({
     description: 'Redirects to the frontend with the JWT token',
-    status: HttpStatus.ACCEPTED,
+    status: HttpStatus.FOUND,
   })
   @ApiNotFoundResponse({
     description: 'OAuth2 is not enabled for GitHub',
@@ -271,7 +271,7 @@ export class Oauth2Controller {
     });
 
     return res
-      .status(HttpStatus.ACCEPTED)
+      .status(HttpStatus.FOUND)
       .redirect(`${this.url}/auth/callback?${urlSearchParams.toString()}`);
   }
 }
