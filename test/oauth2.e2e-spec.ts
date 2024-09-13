@@ -127,7 +127,7 @@ describe('OAuth2 (e2e)', () => {
       const name = faker.person.fullName();
       const email = faker.internet.email().toLowerCase();
 
-      it('should return 202 accepted and redirect with code', async () => {
+      it('should return 302 FOUND and redirect with code', async () => {
         const frontendUrl = `https://${configService.get<string>('domain')}/auth/callback`;
         await cacheManager.set(`oauth_state:${state}`, provider, 120_000);
         const tokenScope = nock(host, {
@@ -171,7 +171,7 @@ describe('OAuth2 (e2e)', () => {
 
         await request(app.getHttpServer())
           .get(`${callbackPath}?code=${code}&state=${state}`)
-          .expect(HttpStatus.ACCEPTED)
+          .expect(HttpStatus.FOUND)
           .expect((res) => {
             expect(res.headers.location.startsWith(frontendUrl)).toBe(true);
 
