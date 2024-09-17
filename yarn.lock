@@ -2797,14 +2797,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.7.4":
-  version: 1.7.4
-  resolution: "axios@npm:1.7.4"
+"axios@npm:1.7.7":
+  version: 1.7.7
+  resolution: "axios@npm:1.7.7"
   dependencies:
     follow-redirects: ^1.15.6
     form-data: ^4.0.0
     proxy-from-env: ^1.1.0
-  checksum: 0c17039a9acfe6a566fca8431ba5c1b455c83d30ea6157fec68a6722878fcd30f3bd32d172f6bee0c51fe75ca98e6414ddcd968a87b5606b573731629440bfaf
+  checksum: 882d4fe0ec694a07c7f5c1f68205eb6dc5a62aecdb632cc7a4a3d0985188ce3030e0b277e1a8260ac3f194d314ae342117660a151fabffdc5081ca0b5a8b47fe
   languageName: node
   linkType: hard
 
@@ -6929,7 +6929,7 @@ __metadata:
     "@types/uuid": 10.0.0
     "@typescript-eslint/eslint-plugin": 8.1.0
     "@typescript-eslint/parser": 8.1.0
-    axios: 1.7.4
+    axios: 1.7.7
     bcrypt: 5.1.1
     cache-manager: 5.7.6
     cache-manager-ioredis-yet: 2.1.1
