@@ -68,7 +68,7 @@
     "@nestjs/testing": "10.4.0",
     "@types/bcrypt": "5.0.2",
     "@types/handlebars": "4.1.0",
-    "@types/jest": "29.5.12",
+    "@types/jest": "29.5.14",
     "@types/jsonwebtoken": "9.0.6",
     "@types/node": "22.2.0",
     "@types/nodemailer": "6.4.15",
