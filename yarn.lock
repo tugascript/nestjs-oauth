@@ -1659,15 +1659,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/swagger@npm:7.4.0":
-  version: 7.4.0
-  resolution: "@nestjs/swagger@npm:7.4.0"
+"@nestjs/swagger@npm:7.4.2":
+  version: 7.4.2
+  resolution: "@nestjs/swagger@npm:7.4.2"
   dependencies:
     "@microsoft/tsdoc": ^0.15.0
     "@nestjs/mapped-types": 2.0.5
     js-yaml: 4.1.0
     lodash: 4.17.21
-    path-to-regexp: 3.2.0
+    path-to-regexp: 3.3.0
     swagger-ui-dist: 5.17.14
   peerDependencies:
     "@fastify/static": ^6.0.0 || ^7.0.0
@@ -1683,7 +1683,7 @@ __metadata:
       optional: true
     class-validator:
       optional: true
-  checksum: 8f1ce75140201f0b064c72c3ab031214d8889ab1fc8bc231d91fdde628ecc14fdb47e2c18477a8758eac4e5d90d312f088f039183c5e67aa2670758491c554e2
+  checksum: 89427d882d2671217a39e4925da6cd244263f15d5b48be89e70bb9171c1480912dce9decf94bff638b4331b9a922bd5ab52e5c74228be8d45d5168d963139d98
   languageName: node
   linkType: hard
 
@@ -6915,7 +6915,7 @@ __metadata:
     "@nestjs/mapped-types": "*"
     "@nestjs/platform-fastify": 10.4.0
     "@nestjs/schematics": 10.1.3
-    "@nestjs/swagger": 7.4.0
+    "@nestjs/swagger": 7.4.2
     "@nestjs/testing": 10.4.0
     "@nestjs/throttler": 6.1.0
     "@types/bcrypt": 5.0.2
@@ -7389,6 +7389,13 @@ __metadata:
   version: 3.2.0
   resolution: "path-to-regexp@npm:3.2.0"
   checksum: c3d35cda3b26d9e604d789b9a1764bb9845f53ca8009d5809356b4677a3c064b0f01117a05a5b4b77bafd5ae002a82592e3f3495e885c22961f8b1dab8bd6ae7
+  languageName: node
+  linkType: hard
+
+"path-to-regexp@npm:3.3.0":
+  version: 3.3.0
+  resolution: "path-to-regexp@npm:3.3.0"
+  checksum: bb249d08804f7961dd44fb175466c900b893c56e909db8e2a66ec12b9d9a964af269eb7a50892c933f52b47315953dfdb4279639fbce20977c3625a9ef3055fe
   languageName: node
   linkType: hard
 
