@@ -37,7 +37,7 @@
     "@nestjs/core": "10.4.0",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-fastify": "10.4.0",
-    "@nestjs/swagger": "7.4.0",
+    "@nestjs/swagger": "7.4.2",
     "@nestjs/throttler": "6.1.0",
     "axios": "1.7.4",
     "bcrypt": "5.1.1",
